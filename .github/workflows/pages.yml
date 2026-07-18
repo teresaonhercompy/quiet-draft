@@ -1,0 +1,57 @@
+name: Deploy Quiet Draft to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Generate background manifest
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          folder = Path("backgrounds")
+          extensions = {".avif", ".gif", ".jpeg", ".jpg", ".png", ".webp"}
+          images = sorted(
+              path.name for path in folder.iterdir()
+              if path.is_file() and path.suffix.lower() in extensions
+          ) if folder.exists() else []
+          folder.mkdir(exist_ok=True)
+          (folder / "backgrounds.json").write_text(
+              json.dumps(images, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload static site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy to Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

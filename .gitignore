@@ -1,0 +1,12 @@
+.DS_Store
+**/.DS_Store
+
+# Personal sound files are uploaded locally through the app, not published.
+*.wav
+*.caf
+*.aif
+*.aiff
+*.mp3
+*.m4a
+*.aac
+*.ogg

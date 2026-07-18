@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#f3efe7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#171816" media="(prefers-color-scheme: dark)">
+    <meta name="description" content="A quiet, private writing space for drafting scenes offline.">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Quiet Draft">
+    <link rel="manifest" href="manifest.webmanifest?v=20260718-5">
+    <link rel="icon" href="icon.svg?v=20260718-5" type="image/svg+xml">
+    <link rel="stylesheet" href="styles.css?v=20260718-5">
+    <title>Quiet Draft</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar" aria-label="Draft controls">
+        <div class="brand" aria-label="Quiet Draft">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>Quiet Draft</span>
+        </div>
+
+        <div class="actions">
+          <button class="button button-quiet" id="new-draft" type="button">New Draft</button>
+          <button class="button" id="save-draft" type="button">Save Locally</button>
+          <button class="button button-quiet" id="export-draft" type="button">Export .txt</button>
+          <button class="button button-quiet" id="copy-draft" type="button">Copy All</button>
+          <button class="button button-quiet" id="atmosphere-toggle" type="button" aria-expanded="false" aria-controls="atmosphere-panel">Atmosphere</button>
+          <button class="icon-button" id="theme-toggle" type="button" aria-label="Use dark mode" title="Toggle light or dark mode">
+            <span class="theme-icon" aria-hidden="true">☾</span>
+          </button>
+          <button class="icon-button focus-button" id="focus-toggle" type="button" aria-label="Enter focus mode" title="Focus mode (⌘⇧F)">
+            <span aria-hidden="true">⌗</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="writing-space">
+        <div class="page" data-editor-style="dark-glass">
+          <label class="visually-hidden" for="draft-title">Draft title</label>
+          <input
+            id="draft-title"
+            class="title-input"
+            type="text"
+            value="Untitled Draft"
+            maxlength="120"
+            autocomplete="off"
+            spellcheck="true"
+            enterkeyhint="next"
+            aria-label="Draft title"
+          >
+
+          <label class="visually-hidden" for="draft-body">Draft text</label>
+          <textarea
+            id="draft-body"
+            class="draft-input"
+            placeholder="Begin here…"
+            autocapitalize="sentences"
+            autocomplete="off"
+            autocorrect="on"
+            spellcheck="true"
+            aria-label="Draft text"
+          ></textarea>
+        </div>
+      </main>
+
+      <footer class="statusbar" aria-label="Draft status">
+        <div class="save-state">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span id="save-status" role="status" aria-live="polite">Saved locally</span>
+        </div>
+        <div class="counts" aria-live="polite">
+          <span><strong id="word-count">0</strong> words</span>
+          <span><strong id="character-count">0</strong> characters</span>
+        </div>
+      </footer>
+
+      <button class="exit-focus" id="exit-focus" type="button" aria-label="Exit focus mode" title="Exit focus mode (Esc)">
+        <span aria-hidden="true">⌗</span>
+        <span>Exit Focus</span>
+      </button>
+
+      <div class="panel-backdrop" id="panel-backdrop" aria-hidden="true"></div>
+
+      <aside class="atmosphere-panel" id="atmosphere-panel" aria-labelledby="atmosphere-title" aria-hidden="true">
+        <div class="panel-header">
+          <div>
+            <p class="panel-eyebrow">Writing environment</p>
+            <h2 id="atmosphere-title">Atmosphere</h2>
+          </div>
+          <button class="icon-button" id="close-atmosphere" type="button" aria-label="Close Atmosphere">×</button>
+        </div>
+
+        <section class="setting-group" aria-labelledby="background-heading">
+          <h3 id="background-heading">Background</h3>
+          <label class="field-label" for="background-select">Scene</label>
+          <select id="background-select">
+            <option value="none">None</option>
+            <optgroup label="Built-in Atmospheres">
+              <option value="warm-paper">Warm Paper</option>
+              <option value="night-sky">Night Sky</option>
+              <option value="rainy-window">Rainy Window</option>
+              <option value="forest-desk">Forest Desk</option>
+            </optgroup>
+          </select>
+
+          <div class="background-actions">
+            <label class="upload-button" for="background-upload">Add background images</label>
+            <input id="background-upload" class="visually-hidden" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.avif" multiple>
+            <button class="text-button" id="refresh-backgrounds" type="button">Refresh folder</button>
+            <button class="text-button" id="remove-background" type="button" disabled>Remove selected</button>
+          </div>
+          <p class="setting-note background-note">Images discovered in the backgrounds folder and images added here appear in the Scene menu.</p>
+
+          <label class="field-label" for="editor-style">Editor appearance</label>
+          <select id="editor-style">
+            <option value="dark-glass">Dark Glass</option>
+            <option value="light-paper">Light Paper</option>
+          </select>
+
+          <div class="range-heading">
+            <label class="field-label" for="editor-opacity">Panel strength</label>
+            <output id="editor-opacity-value" for="editor-opacity">58%</output>
+          </div>
+          <input id="editor-opacity" type="range" min="25" max="90" step="1" value="58">
+          <p class="setting-note">Lower the strength to reveal more of the scene behind your text.</p>
+        </section>
+
+        <section class="setting-group" aria-labelledby="sound-heading">
+          <h3 id="sound-heading">Typing sounds</h3>
+
+          <label class="toggle-row" for="sound-enabled">
+            <span>
+              <strong>Enable typing sounds</strong>
+              <small>Off until you choose to enable it</small>
+            </span>
+            <input id="sound-enabled" type="checkbox" role="switch">
+          </label>
+
+          <label class="field-label" for="sound-style">Sound style</label>
+          <select id="sound-style">
+            <option value="soft-click">Soft Click</option>
+            <option value="typewriter">Typewriter</option>
+            <option value="mechanical">Mechanical</option>
+          </select>
+
+          <div class="sound-upload">
+            <label class="upload-button" for="sound-upload">Add your own sounds</label>
+            <input id="sound-upload" class="visually-hidden" type="file" accept="audio/*,.wav,.mp3,.m4a,.aac,.ogg,.caf,.aiff,.aif" multiple>
+            <button class="text-button" id="remove-sound" type="button" disabled>Remove selected</button>
+          </div>
+          <p class="setting-note sound-note">Choose one or several short audio files. Uploaded sounds appear in the Sound style menu and stay on this device.</p>
+
+          <div class="range-heading">
+            <label class="field-label" for="sound-volume">Volume</label>
+            <output id="sound-volume-value" for="sound-volume">35%</output>
+          </div>
+          <input id="sound-volume" type="range" min="0" max="100" step="1" value="35">
+
+          <label class="toggle-row compact" for="sound-muted">
+            <span><strong>Mute</strong></span>
+            <input id="sound-muted" type="checkbox" role="switch">
+          </label>
+        </section>
+
+        <p class="privacy-note">Atmosphere settings and draft text stay on this device.</p>
+      </aside>
+
+      <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+    </div>
+
+    <script src="app.js?v=20260718-5" defer></script>
+  </body>
+</html>

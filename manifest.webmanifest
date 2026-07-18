@@ -1,0 +1,21 @@
+{
+  "name": "Quiet Draft",
+  "short_name": "Quiet Draft",
+  "description": "A quiet, private writing space for drafting scenes offline.",
+  "id": "./",
+  "start_url": "./?v=20260718-5",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f3efe7",
+  "theme_color": "#f3efe7",
+  "categories": ["productivity", "writing"],
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
