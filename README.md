@@ -116,11 +116,11 @@ The import file format is:
 
 ## Private local discography
 
-Open **Manage Local Library** in the Discography card. Enter the artist and album, choose **Add Tracks**, and select the corresponding audio files from Files. Use **Add Album Art** to associate a local image with the same artist and album.
+Open **Manage Local Library**, choose **Add Tracks**, and select audio files from Files. Tagged MP3 files automatically supply their title, artist, album, track number, and embedded cover art. The artist/album fields and **Add Album Art** remain available as fallbacks for untagged files and formats whose tags are not read.
 
-Audio and artwork are copied into IndexedDB only after an explicit import. They are not committed, uploaded, streamed, or placed in the service-worker cache. The player never starts automatically. It remembers the selected track, approximate position, volume, shuffle, and repeat preferences for the next launch.
+Audio, tags, and artwork are read locally and copied into IndexedDB only after an explicit import. They are not committed, uploaded, streamed, or placed in the service-worker cache. The player never starts automatically and pauses when the app leaves the foreground. It remembers the selected track, approximate position, volume, shuffle, and repeat preferences for the next launch.
 
-MP3, M4A, and WAV are the safest iPad formats. Browser support for AAC, CAF, AIFF, and OGG depends on the file's codec. Import one album at a time, retain every original in Files, and remember that Safari may remove local website data when storage is cleared or under device pressure.
+MP3, M4A, and WAV are the safest iPad formats. Embedded metadata is currently read from ID3-tagged MP3 files; other formats use the fallback fields and filename-derived title. Retain every original in Files, and remember that Safari may remove local website data when storage is cleared or under device pressure.
 
 ## Optional local background images
 

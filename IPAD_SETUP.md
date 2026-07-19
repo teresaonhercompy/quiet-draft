@@ -200,20 +200,20 @@ The built-in **Soft Click**, **Typewriter**, and **Mechanical** styles are gener
 
 ## 8. Import the private discography
 
-Import one album at a time so every track receives the correct metadata.
+Tagged MP3 files can be selected across albums because Quiet Draft reads their embedded details locally. For untagged files, import one album at a time and use the fallback fields.
 
 1. Open the **Discography** card and expand **Manage Local Library**.
-2. Enter the artist exactly as you want it displayed.
-3. Enter the album title exactly as you want it displayed.
+2. If the files are untagged—or are not MP3s—enter the fallback artist exactly as you want it displayed.
+3. Enter the fallback album title exactly as you want it displayed.
 4. Tap **Add Tracks**.
 5. In Files, open `Quiet Draft Assets → Music` and select that album's audio files.
 6. Wait for the confirmation showing how many tracks were added.
-7. To add cover art, keep the same artist and album values, tap **Add Album Art**, and select one image.
+7. Tagged MP3 cover art appears automatically. If none appears, keep the same artist and album values, tap **Add Album Art**, and select one image.
 8. Repeat these steps for each album.
 
-The player derives each track title from its filename and removes a simple leading track number such as `01 -`. It does not read or upload embedded music metadata. MP3, M4A, and WAV are recommended; other accepted extensions work only when Safari supports their codec.
+For ID3-tagged MP3s, the player reads the embedded title, artist, album, track number, and cover art without uploading anything. Track numbers determine album order. Untagged files and other formats use the fallback fields; their titles come from filenames with a simple leading number such as `01 -` removed. MP3, M4A, and WAV are recommended; other accepted extensions work only when Safari supports their codec.
 
-Test play/pause, previous/next, seek, volume, shuffle, and all three repeat states. Playback begins only after tapping Play. The selected track and approximate position return after reopening, but playback remains paused.
+Test play/pause, previous/next, seek, volume, shuffle, and all three repeat states. Playback begins only after tapping Play and pauses when Quiet Draft leaves the foreground. The selected track and approximate position return after reopening, but playback remains paused.
 
 To remove music, select the album and track, expand **Manage Local Library**, and use **Remove Track** or **Remove Album**. This removes only the browser's imported copy.
 

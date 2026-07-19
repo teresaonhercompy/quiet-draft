@@ -172,3 +172,15 @@
 **Alternatives considered:** Automatically cache every imported track; publish and cache remote music; implement per-album service-worker downloads.
 
 **Consequences:** The app shell remains lightweight. Removing an imported track deletes its authoritative local blob without leaving a second service-worker copy.
+
+## DCC-016 — Read MP3 tags locally and pause outside the foreground
+
+**Date:** 2026-07-19
+
+**Decision:** Parse common ID3v2 MP3 frames locally for title, artist, album, track number, and embedded artwork. Use the manual artist/album fields, filename-derived title, and artwork picker as fallbacks. Pause playback on `visibilitychange` and `pagehide` while preserving the current position.
+
+**Reason:** The private discography already contains useful embedded metadata, and audio continuing after the Home Screen app closes is surprising. A small first-party parser preserves the no-dependency and local-only architecture.
+
+**Alternatives considered:** Continue requiring manual metadata; add an external tag-reading library; upload files to a metadata service; allow operating-system background playback.
+
+**Consequences:** ID3-tagged MP3 imports need less manual setup and sort by track number. M4A and other tag formats still use fallbacks. Existing imported tracks are unchanged until removed and imported again. Leaving the app pauses music, while entering Focus Mode inside the app does not.

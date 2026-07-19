@@ -617,6 +617,10 @@
       .trim() || "Untitled Track";
   }
 
+  function musicImportValue(value, fallback, maximumLength) {
+    return String(value || fallback || "").trim().slice(0, maximumLength);
+  }
+
   function formatMusicTime(seconds) {
     if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
     const whole = Math.floor(seconds);
@@ -662,7 +666,11 @@
     musicAlbums = Array.from(grouped.values())
       .map((album) => ({
         ...album,
-        tracks: album.tracks.sort((a, b) => (a.addedAt || 0) - (b.addedAt || 0) || a.title.localeCompare(b.title))
+        tracks: album.tracks.sort((a, b) => {
+          const aNumber = Number.isFinite(a.trackNumber) ? a.trackNumber : Number.MAX_SAFE_INTEGER;
+          const bNumber = Number.isFinite(b.trackNumber) ? b.trackNumber : Number.MAX_SAFE_INTEGER;
+          return aNumber - bNumber || (a.addedAt || 0) - (b.addedAt || 0) || a.title.localeCompare(b.title);
+        })
       }))
       .sort((a, b) => a.artist.localeCompare(b.artist) || a.title.localeCompare(b.title));
   }
@@ -917,19 +925,29 @@
     const files = Array.from(event.target.files || []).slice(0, 100);
     event.target.value = "";
     if (!files.length) return;
-    const artist = elements.musicImportArtist.value.trim();
-    const album = elements.musicImportAlbum.value.trim();
-    if (!artist || !album) {
-      showToast("Enter an artist and album before adding tracks");
-      return;
-    }
-    const albumId = musicAlbumId(artist, album);
-    const existingNames = new Set(musicTracks.filter((track) => track.albumId === albumId).map((track) => track.name.toLocaleLowerCase()));
+    const fallbackArtist = elements.musicImportArtist.value.trim();
+    const fallbackAlbum = elements.musicImportAlbum.value.trim();
+    const existingTracks = new Set(musicTracks.map((track) => `${track.albumId}|${track.name.toLocaleLowerCase()}`));
+    const artworkAlbums = new Set(musicArtwork.map((item) => item.id));
     let added = 0;
+    let metadataApplied = 0;
     let lastTrackId = "";
+    let lastAlbumId = "";
 
     for (const file of files) {
-      if (file.size > 512 * 1024 * 1024 || existingNames.has(file.name.toLocaleLowerCase())) continue;
+      if (file.size > 512 * 1024 * 1024) continue;
+      let metadata = {};
+      try {
+        metadata = await globalThis.QuietDraftMusicMetadata.readMp3Metadata(file);
+      } catch (error) {
+        // A track still imports with its filename and the fallback fields when tags are unreadable.
+      }
+      const artist = musicImportValue(metadata.artist, fallbackArtist, 100);
+      const album = musicImportValue(metadata.album, fallbackAlbum, 120);
+      if (!artist || !album) continue;
+      const albumId = musicAlbumId(artist, album);
+      const trackKey = `${albumId}|${file.name.toLocaleLowerCase()}`;
+      if (existingTracks.has(trackKey)) continue;
       const id = newSoundId();
       try {
         await storeRecord(MUSIC_TRACK_STORE, {
@@ -937,15 +955,35 @@
           albumId,
           artist,
           album,
-          title: musicTitle(file.name),
+          title: musicImportValue(metadata.title, musicTitle(file.name), 180),
+          trackNumber: Number.isFinite(metadata.trackNumber) ? metadata.trackNumber : null,
           name: file.name,
           type: file.type,
           size: file.size,
           blob: file,
           addedAt: Date.now() + added
         });
-        existingNames.add(file.name.toLocaleLowerCase());
+        existingTracks.add(trackKey);
+        if (metadata.artwork && metadata.artwork.size <= 15 * 1024 * 1024 && !artworkAlbums.has(albumId)) {
+          try {
+            await storeRecord(MUSIC_ARTWORK_STORE, {
+              id: albumId,
+              artist,
+              album,
+              name: `${album}-embedded-artwork`,
+              type: metadata.artwork.type,
+              blob: metadata.artwork,
+              source: "embedded",
+              addedAt: Date.now()
+            });
+            artworkAlbums.add(albumId);
+          } catch (error) {
+            // The track remains usable when embedded artwork cannot fit in local storage.
+          }
+        }
+        if (metadata.title || metadata.artist || metadata.album || Number.isFinite(metadata.trackNumber)) metadataApplied += 1;
         lastTrackId = id;
+        lastAlbumId = albumId;
         added += 1;
       } catch (error) {
         setMusicError("Local storage filled before every track could be added. Keep the originals in Files.");
@@ -953,8 +991,14 @@
       }
     }
 
-    await loadMusicLibrary({ preferAlbumId: albumId, preferTrackId: lastTrackId });
-    showToast(added ? `${added} track${added === 1 ? "" : "s"} added locally` : "No new compatible tracks were added");
+    await loadMusicLibrary({ preferAlbumId: lastAlbumId, preferTrackId: lastTrackId });
+    const metadataNote = metadataApplied ? " · MP3 details applied" : "";
+    showToast(added ? `${added} track${added === 1 ? "" : "s"} added locally${metadataNote}` : "No new compatible tracks were added");
+  }
+
+  function pauseMusicForBackground() {
+    if (!elements.musicAudio.paused) elements.musicAudio.pause();
+    saveMusicState();
   }
 
   async function importMusicArtwork(event) {
@@ -1687,13 +1731,13 @@
   document.addEventListener("keydown", handleKeyboard);
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") {
+      pauseMusicForBackground();
       saveDraft();
-      saveMusicState();
     }
   });
   window.addEventListener("pagehide", () => {
+    pauseMusicForBackground();
     saveDraft();
-    saveMusicState();
   });
   window.addEventListener("online", updateConnectionStatus);
   window.addEventListener("offline", updateConnectionStatus);
@@ -1714,7 +1758,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260719-5")
+      navigator.serviceWorker.register("./service-worker.js?v=20260719-6")
         .then((registration) => registration.update())
         .catch((error) => {
           if (!navigator.serviceWorker.controller) {
