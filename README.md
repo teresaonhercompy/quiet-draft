@@ -1,6 +1,6 @@
 # Dreamspeak Command Center — Quiet Draft
 
-Dreamspeak Command Center is a dark, local-first creative shell built around Quiet Draft, its distraction-free scene editor for iPad. Phase 1 adds the responsive Command Center layout and future-module placeholders while keeping all working Quiet Draft behavior intact. It runs entirely in the browser, saves the current draft on the device, and works offline after its first successful load.
+Dreamspeak Command Center is a dark, local-first creative shell built around Quiet Draft, its distraction-free scene editor for iPad. Phase 2 adds character facts, Mabel encouragement, and an image-preview module while keeping all working Quiet Draft behavior intact. It runs entirely in the browser, saves the current draft on the device, and works offline after its first successful load.
 
 There is no login, cloud sync, AI, analytics, or external service. Draft text is stored only in the browser's local storage. Export or copy the text when you are ready to move it into Scrivener.
 
@@ -8,7 +8,11 @@ There is no login, cloud sync, AI, analytics, or external service. Draft text is
 
 - Dark, responsive Command Center shell with a three-column iPad-landscape layout
 - Editor-first portrait layout with supporting modules stacked afterward
-- Quiet placeholders for future facts, encouragement, imagery, music, tools, and the separate local Wiki
+- Random Tabi/Norielle facts from a private, device-local JSON library
+- Random authored Mabel messages with a manual **Next Message** control
+- Offline image preview with previous, random, and next controls
+- Private gallery-image imports stored only on the current device
+- Quiet placeholders for future music, tools, and the separate local Wiki
 - Full-screen, responsive writing space
 - Automatic local saving while you type
 - Manual **Save Locally** button and `Command-S` shortcut
@@ -80,6 +84,34 @@ For a new repository:
 
 The published app and any background images committed to the repository are public. Drafts, locally added backgrounds, and locally uploaded sounds remain in the browser and are never committed or uploaded by Quiet Draft.
 
+## Private Phase 2 content
+
+The public repository intentionally contains no manuscript-derived facts or private character art. Select **Import Library** in either character card to choose a JSON library from Files. The imported facts and messages are stored in the app's local IndexedDB database on that device and remain available offline.
+
+Use **Add Local Images** in Image Preview to add private artwork. Those images are copied into the same device-local database and are not uploaded. The four previously approved public background scenes are the included offline gallery.
+
+The import file format is:
+
+```json
+{
+  "facts": [
+    {
+      "id": "unique-fact-id",
+      "speaker": "Tabi",
+      "category": "Canon",
+      "text": "The approved fact text.",
+      "nonCanon": false
+    }
+  ],
+  "encouragement": [
+    {
+      "id": "unique-message-id",
+      "text": "The authored message."
+    }
+  ]
+}
+```
+
 ## Optional local background images
 
 Quiet Draft includes CSS fallback art, so no image files are required. It now discovers any `.jpg`, `.jpeg`, `.png`, `.webp`, `.gif`, or `.avif` file inside the `backgrounds` folder when the web host exposes a directory listing. Discovered files appear under **Backgrounds Folder** in the Scene menu. Use **Refresh folder** after adding files.
@@ -110,6 +142,7 @@ The **Dark Glass** editor appearance uses white text on a translucent charcoal p
 - `manifest.webmanifest` — install settings
 - `service-worker.js` — offline app cache
 - `icon.svg` — local app icon
+- `data/` — public, non-proprietary module metadata and authored messages
 
 No build step or package installation is required.
 

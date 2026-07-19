@@ -8,6 +8,8 @@
   const SOUND_DATABASE = "quiet-draft-assets";
   const SOUND_STORE = "sounds";
   const BACKGROUND_STORE = "backgrounds";
+  const CONTENT_STORE = "command-center-content";
+  const GALLERY_STORE = "gallery";
   const AUTOSAVE_DELAY = 650;
   const DEFAULT_ATMOSPHERE = {
     background: "none",
@@ -55,7 +57,28 @@
     characterCount: document.querySelector("#character-count"),
     saveStatus: document.querySelector("#save-status"),
     statusDot: document.querySelector(".status-dot"),
-    toast: document.querySelector("#toast")
+    toast: document.querySelector("#toast"),
+    factCategory: document.querySelector("#fact-category"),
+    factSpeaker: document.querySelector("#fact-speaker"),
+    factText: document.querySelector("#fact-text"),
+    factNonCanon: document.querySelector("#fact-non-canon"),
+    factAvatarTabi: document.querySelector("#fact-avatar-tabi"),
+    factAvatarNorielle: document.querySelector("#fact-avatar-norielle"),
+    nextFact: document.querySelector("#next-fact"),
+    importFacts: document.querySelector("#import-facts"),
+    mabelMessage: document.querySelector("#mabel-message"),
+    nextMessage: document.querySelector("#next-message"),
+    importMessages: document.querySelector("#import-messages"),
+    contentLibraryUpload: document.querySelector("#content-library-upload"),
+    galleryImage: document.querySelector("#gallery-image"),
+    galleryEmpty: document.querySelector("#gallery-empty"),
+    galleryTitle: document.querySelector("#gallery-title"),
+    galleryCaption: document.querySelector("#gallery-caption"),
+    galleryPosition: document.querySelector("#gallery-position"),
+    previousImage: document.querySelector("#previous-image"),
+    randomImage: document.querySelector("#random-image"),
+    nextImage: document.querySelector("#next-image"),
+    galleryUpload: document.querySelector("#gallery-upload")
   };
 
   let saveTimer;
@@ -67,6 +90,13 @@
   let uploadedBackgrounds = [];
   let folderBackgrounds = [];
   let backgroundObjectUrl = null;
+  let galleryObjectUrl = null;
+  let facts = [];
+  let encouragement = [];
+  let galleryItems = [];
+  let factIndex = -1;
+  let messageIndex = -1;
+  let galleryIndex = -1;
   const customSoundBuffers = new Map();
   let atmosphere = { ...DEFAULT_ATMOSPHERE };
 
@@ -154,7 +184,7 @@
   function openSoundDatabase() {
     if (soundDatabasePromise) return soundDatabasePromise;
     soundDatabasePromise = new Promise((resolve, reject) => {
-      const request = indexedDB.open(SOUND_DATABASE, 2);
+      const request = indexedDB.open(SOUND_DATABASE, 3);
       request.onupgradeneeded = () => {
         const database = request.result;
         if (!database.objectStoreNames.contains(SOUND_STORE)) {
@@ -162,6 +192,12 @@
         }
         if (!database.objectStoreNames.contains(BACKGROUND_STORE)) {
           database.createObjectStore(BACKGROUND_STORE, { keyPath: "id" });
+        }
+        if (!database.objectStoreNames.contains(CONTENT_STORE)) {
+          database.createObjectStore(CONTENT_STORE, { keyPath: "id" });
+        }
+        if (!database.objectStoreNames.contains(GALLERY_STORE)) {
+          database.createObjectStore(GALLERY_STORE, { keyPath: "id" });
         }
       };
       request.onsuccess = () => resolve(request.result);
@@ -224,9 +260,255 @@
     });
   }
 
+  async function getStoredRecord(storeName, id) {
+    const database = await openSoundDatabase();
+    return new Promise((resolve, reject) => {
+      const request = database.transaction(storeName, "readonly").objectStore(storeName).get(id);
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async function getAllStoredRecords(storeName) {
+    const database = await openSoundDatabase();
+    return new Promise((resolve, reject) => {
+      const request = database.transaction(storeName, "readonly").objectStore(storeName).getAll();
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async function storeRecord(storeName, record) {
+    const database = await openSoundDatabase();
+    return new Promise((resolve, reject) => {
+      const request = database.transaction(storeName, "readwrite").objectStore(storeName).put(record);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  }
+
   function newSoundId() {
     if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
     return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  }
+
+  function randomIndex(length, current = -1) {
+    if (length <= 1) return length ? 0 : -1;
+    let next = Math.floor(Math.random() * length);
+    if (next === current) next = (next + 1) % length;
+    return next;
+  }
+
+  async function loadDataFile(path) {
+    try {
+      const response = await fetch(path);
+      if (!response.ok) return [];
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function validFacts(items) {
+    if (!Array.isArray(items)) return [];
+    return items
+      .filter((item) => item && typeof item.text === "string" && item.text.trim())
+      .slice(0, 500)
+      .map((item, index) => ({
+        id: typeof item.id === "string" ? item.id : `fact-${index + 1}`,
+        speaker: typeof item.speaker === "string" && item.speaker.trim() ? item.speaker.trim() : "Tabi & Norielle",
+        category: typeof item.category === "string" && item.category.trim() ? item.category.trim() : "Canon",
+        text: item.text.trim(),
+        nonCanon: item.nonCanon === true
+      }));
+  }
+
+  function validMessages(items) {
+    if (!Array.isArray(items)) return [];
+    return items
+      .filter((item) => (typeof item === "string" && item.trim()) || (item && typeof item.text === "string" && item.text.trim()))
+      .slice(0, 500)
+      .map((item, index) => ({
+        id: typeof item === "object" && typeof item.id === "string" ? item.id : `message-${index + 1}`,
+        text: (typeof item === "string" ? item : item.text).trim()
+      }));
+  }
+
+  function renderFact() {
+    const fact = facts[factIndex];
+    const hasFact = Boolean(fact);
+    elements.factCategory.textContent = hasFact ? fact.category : "Local library";
+    elements.factSpeaker.textContent = hasFact ? fact.speaker : "Private facts";
+    elements.factText.textContent = hasFact ? fact.text : "Import your private character library to this device.";
+    elements.factNonCanon.hidden = !hasFact || !fact.nonCanon;
+    elements.factAvatarTabi.classList.toggle("active", hasFact && /tabi/i.test(fact.speaker));
+    elements.factAvatarNorielle.classList.toggle("active", hasFact && /norielle/i.test(fact.speaker));
+    elements.nextFact.disabled = facts.length < 2;
+  }
+
+  function showNextFact() {
+    factIndex = randomIndex(facts.length, factIndex);
+    renderFact();
+  }
+
+  function renderMessage() {
+    const message = encouragement[messageIndex];
+    elements.mabelMessage.textContent = message ? `“${message.text}”` : "“Import a private message library when you are ready.”";
+    elements.nextMessage.disabled = encouragement.length < 2;
+  }
+
+  function showNextMessage() {
+    messageIndex = randomIndex(encouragement.length, messageIndex);
+    renderMessage();
+  }
+
+  async function loadCharacterModules() {
+    const bundledFacts = validFacts(await loadDataFile("./data/facts.json"));
+    const bundledMessages = validMessages(await loadDataFile("./data/encouragement.json"));
+    try {
+      const localFacts = await getStoredRecord(CONTENT_STORE, "facts");
+      const localMessages = await getStoredRecord(CONTENT_STORE, "encouragement");
+      facts = [...bundledFacts, ...validFacts(localFacts && localFacts.items)];
+      encouragement = [...bundledMessages, ...validMessages(localMessages && localMessages.items)];
+    } catch (error) {
+      facts = bundledFacts;
+      encouragement = bundledMessages;
+    }
+    factIndex = randomIndex(facts.length);
+    messageIndex = randomIndex(encouragement.length);
+    renderFact();
+    renderMessage();
+  }
+
+  async function importContentLibrary(event) {
+    const file = event.target.files && event.target.files[0];
+    event.target.value = "";
+    if (!file) return;
+    if (file.size > 1024 * 1024) {
+      showToast("That library file is too large");
+      return;
+    }
+
+    try {
+      const data = JSON.parse(await file.text());
+      const importedFacts = validFacts(data && data.facts);
+      const importedMessages = validMessages(data && (data.encouragement || data.messages));
+      if (!importedFacts.length && !importedMessages.length) throw new Error("No compatible content");
+      if (importedFacts.length) await storeRecord(CONTENT_STORE, { id: "facts", items: importedFacts, updatedAt: Date.now() });
+      if (importedMessages.length) await storeRecord(CONTENT_STORE, { id: "encouragement", items: importedMessages, updatedAt: Date.now() });
+      await loadCharacterModules();
+      showToast(`${importedFacts.length} facts and ${importedMessages.length} messages imported`);
+    } catch (error) {
+      showToast("That content library could not be imported");
+    }
+  }
+
+  function validGalleryMetadata(items) {
+    if (!Array.isArray(items)) return [];
+    return items
+      .filter((item) => item && typeof item.file === "string" && item.file.trim())
+      .map((item, index) => ({
+        id: typeof item.id === "string" ? item.id : `bundled-gallery-${index + 1}`,
+        source: "bundled",
+        file: item.file,
+        title: typeof item.title === "string" && item.title.trim() ? item.title.trim() : backgroundLabel(item.file.split("/").pop()),
+        caption: typeof item.caption === "string" ? item.caption.trim() : "",
+        collection: typeof item.collection === "string" ? item.collection.trim() : ""
+      }));
+  }
+
+  async function loadGallery() {
+    const bundled = validGalleryMetadata(await loadDataFile("./data/gallery.json"));
+    let local = [];
+    try {
+      local = (await getAllStoredRecords(GALLERY_STORE)).map((item) => ({ ...item, source: "local" }));
+    } catch (error) {
+      local = [];
+    }
+    galleryItems = [...bundled, ...local];
+    galleryIndex = randomIndex(galleryItems.length);
+    renderGallery();
+  }
+
+  function renderGallery() {
+    if (galleryObjectUrl) {
+      URL.revokeObjectURL(galleryObjectUrl);
+      galleryObjectUrl = null;
+    }
+
+    const item = galleryItems[galleryIndex];
+    const hasItem = Boolean(item);
+    elements.galleryPosition.textContent = hasItem ? `${galleryIndex + 1} / ${galleryItems.length}` : "0 / 0";
+    elements.galleryTitle.textContent = hasItem ? item.title : "Private gallery";
+    elements.galleryCaption.textContent = hasItem
+      ? item.caption || item.collection || (item.source === "local" ? "Stored only on this device." : "Included offline scene.")
+      : "Add images on this device or browse the included scenes.";
+    elements.previousImage.disabled = galleryItems.length < 2;
+    elements.randomImage.disabled = galleryItems.length < 2;
+    elements.nextImage.disabled = galleryItems.length < 2;
+
+    if (!hasItem) {
+      elements.galleryImage.hidden = true;
+      elements.galleryImage.removeAttribute("src");
+      elements.galleryEmpty.hidden = false;
+      elements.galleryEmpty.textContent = "No image available";
+      return;
+    }
+
+    const source = item.source === "local" && item.blob ? URL.createObjectURL(item.blob) : item.file;
+    if (item.source === "local") galleryObjectUrl = source;
+    elements.galleryEmpty.hidden = true;
+    elements.galleryImage.hidden = false;
+    elements.galleryImage.alt = item.title;
+    elements.galleryImage.src = source;
+  }
+
+  function moveGallery(direction) {
+    if (!galleryItems.length) return;
+    galleryIndex = (galleryIndex + direction + galleryItems.length) % galleryItems.length;
+    renderGallery();
+  }
+
+  function showRandomGalleryImage() {
+    galleryIndex = randomIndex(galleryItems.length, galleryIndex);
+    renderGallery();
+  }
+
+  async function uploadGalleryImages(event) {
+    const files = Array.from(event.target.files || []).slice(0, 40);
+    event.target.value = "";
+    if (!files.length) return;
+    let added = 0;
+
+    for (const file of files) {
+      if (file.size > 15 * 1024 * 1024) continue;
+      try {
+        await validateImage(file);
+        await storeRecord(GALLERY_STORE, {
+          id: newSoundId(),
+          name: file.name,
+          title: backgroundLabel(file.name),
+          caption: "",
+          collection: "My Images",
+          type: file.type,
+          blob: file,
+          addedAt: Date.now()
+        });
+        added += 1;
+      } catch (error) {
+        // Skip unreadable images without exposing filenames or interrupting writing.
+      }
+    }
+
+    await loadGallery();
+    showToast(added ? `${added} gallery image${added === 1 ? "" : "s"} added` : "No compatible images were added");
+  }
+
+  function handleGalleryImageError() {
+    elements.galleryImage.hidden = true;
+    elements.galleryEmpty.hidden = false;
+    elements.galleryEmpty.textContent = "This image is missing or unreadable";
   }
 
   async function refreshSoundOptions() {
@@ -861,6 +1143,16 @@
   elements.themeToggle.addEventListener("click", toggleTheme);
   elements.focusToggle.addEventListener("click", () => setFocusMode(true));
   elements.exitFocus.addEventListener("click", () => setFocusMode(false));
+  elements.nextFact.addEventListener("click", showNextFact);
+  elements.importFacts.addEventListener("click", () => elements.contentLibraryUpload.click());
+  elements.nextMessage.addEventListener("click", showNextMessage);
+  elements.importMessages.addEventListener("click", () => elements.contentLibraryUpload.click());
+  elements.contentLibraryUpload.addEventListener("change", importContentLibrary);
+  elements.previousImage.addEventListener("click", () => moveGallery(-1));
+  elements.randomImage.addEventListener("click", showRandomGalleryImage);
+  elements.nextImage.addEventListener("click", () => moveGallery(1));
+  elements.galleryUpload.addEventListener("change", uploadGalleryImages);
+  elements.galleryImage.addEventListener("error", handleGalleryImageError);
   document.addEventListener("keydown", handleTypingSound);
   document.addEventListener("keydown", handleKeyboard);
   document.addEventListener("visibilitychange", () => {
@@ -876,13 +1168,15 @@
   applyAtmosphere();
   initializeBackgroundOptions();
   refreshSoundOptions();
+  loadCharacterModules();
+  loadGallery();
   loadDraft();
   updateCounts();
   resizeEditor();
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260719-1")
+      navigator.serviceWorker.register("./service-worker.js?v=20260719-2")
         .then((registration) => registration.update())
         .catch((error) => {
           if (!navigator.serviceWorker.controller) {

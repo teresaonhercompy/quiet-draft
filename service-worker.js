@@ -1,4 +1,4 @@
-const VERSION = "20260719-1";
+const VERSION = "20260719-2";
 const CACHE_NAME = `quiet-draft-${VERSION}`;
 const APP_SHELL = [
   "./",
@@ -6,7 +6,14 @@ const APP_SHELL = [
   `./styles.css?v=${VERSION}`,
   `./app.js?v=${VERSION}`,
   `./manifest.webmanifest?v=${VERSION}`,
-  `./icon.svg?v=${VERSION}`
+  `./icon.svg?v=${VERSION}`,
+  "./data/facts.json",
+  "./data/encouragement.json",
+  "./data/gallery.json",
+  "./backgrounds/forest-desk.jpg",
+  "./backgrounds/night-sky.jpg",
+  "./backgrounds/rainy-window.jpg",
+  "./backgrounds/warm-paper.jpg"
 ];
 
 self.addEventListener("install", (event) => {

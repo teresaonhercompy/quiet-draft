@@ -1,0 +1,30 @@
+[
+  {
+    "id": "scene-forest-desk",
+    "file": "backgrounds/forest-desk.jpg",
+    "title": "Forest Desk",
+    "caption": "A quiet workspace beneath the trees.",
+    "collection": "Included Scenes"
+  },
+  {
+    "id": "scene-night-sky",
+    "file": "backgrounds/night-sky.jpg",
+    "title": "Night Sky",
+    "caption": "A dark horizon for late pages.",
+    "collection": "Included Scenes"
+  },
+  {
+    "id": "scene-rainy-window",
+    "file": "backgrounds/rainy-window.jpg",
+    "title": "Rainy Window",
+    "caption": "Rain, lamplight, and room to think.",
+    "collection": "Included Scenes"
+  },
+  {
+    "id": "scene-warm-paper",
+    "file": "backgrounds/warm-paper.jpg",
+    "title": "Warm Paper",
+    "caption": "A softer scene for an unhurried draft.",
+    "collection": "Included Scenes"
+  }
+]
