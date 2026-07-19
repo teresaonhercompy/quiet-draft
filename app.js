@@ -10,6 +10,9 @@
   const BACKGROUND_STORE = "backgrounds";
   const CONTENT_STORE = "command-center-content";
   const GALLERY_STORE = "gallery";
+  const MUSIC_TRACK_STORE = "music-tracks";
+  const MUSIC_ARTWORK_STORE = "music-artwork";
+  const MUSIC_STATE_KEY = "dreamspeak.music-player.v1";
   const AUTOSAVE_DELAY = 650;
   const DEFAULT_ATMOSPHERE = {
     background: "none",
@@ -78,7 +81,32 @@
     previousImage: document.querySelector("#previous-image"),
     randomImage: document.querySelector("#random-image"),
     nextImage: document.querySelector("#next-image"),
-    galleryUpload: document.querySelector("#gallery-upload")
+    galleryUpload: document.querySelector("#gallery-upload"),
+    musicAudio: document.querySelector("#music-audio"),
+    musicAlbumSelect: document.querySelector("#music-album-select"),
+    musicTrackSelect: document.querySelector("#music-track-select"),
+    musicTrackTitle: document.querySelector("#music-track-title"),
+    musicTrackMeta: document.querySelector("#music-track-meta"),
+    musicLibraryCount: document.querySelector("#music-library-count"),
+    musicArtworkImage: document.querySelector("#album-artwork-image"),
+    musicArtworkPlaceholder: document.querySelector("#album-artwork-placeholder"),
+    musicCurrentTime: document.querySelector("#music-current-time"),
+    musicDuration: document.querySelector("#music-duration"),
+    musicSeek: document.querySelector("#music-seek"),
+    musicPrevious: document.querySelector("#music-previous"),
+    musicPlay: document.querySelector("#music-play"),
+    musicNext: document.querySelector("#music-next"),
+    musicShuffle: document.querySelector("#music-shuffle"),
+    musicRepeat: document.querySelector("#music-repeat"),
+    musicVolume: document.querySelector("#music-volume"),
+    musicVolumeValue: document.querySelector("#music-volume-value"),
+    musicError: document.querySelector("#music-error"),
+    musicImportArtist: document.querySelector("#music-import-artist"),
+    musicImportAlbum: document.querySelector("#music-import-album"),
+    musicTrackUpload: document.querySelector("#music-track-upload"),
+    musicCoverUpload: document.querySelector("#music-cover-upload"),
+    musicRemoveTrack: document.querySelector("#music-remove-track"),
+    musicRemoveAlbum: document.querySelector("#music-remove-album")
   };
 
   let saveTimer;
@@ -97,6 +125,23 @@
   let factIndex = -1;
   let messageIndex = -1;
   let galleryIndex = -1;
+  let musicTracks = [];
+  let musicArtwork = [];
+  let musicAlbums = [];
+  let selectedMusicAlbumId = "";
+  let selectedMusicTrackId = "";
+  let musicObjectUrl = null;
+  let musicArtworkObjectUrl = null;
+  let pendingMusicPosition = 0;
+  let lastMusicStateSecond = -1;
+  let musicState = {
+    albumId: "",
+    trackId: "",
+    position: 0,
+    volume: 70,
+    shuffle: false,
+    repeat: "off"
+  };
   const customSoundBuffers = new Map();
   let atmosphere = { ...DEFAULT_ATMOSPHERE };
 
@@ -184,7 +229,7 @@
   function openSoundDatabase() {
     if (soundDatabasePromise) return soundDatabasePromise;
     soundDatabasePromise = new Promise((resolve, reject) => {
-      const request = indexedDB.open(SOUND_DATABASE, 3);
+      const request = indexedDB.open(SOUND_DATABASE, 4);
       request.onupgradeneeded = () => {
         const database = request.result;
         if (!database.objectStoreNames.contains(SOUND_STORE)) {
@@ -198,6 +243,12 @@
         }
         if (!database.objectStoreNames.contains(GALLERY_STORE)) {
           database.createObjectStore(GALLERY_STORE, { keyPath: "id" });
+        }
+        if (!database.objectStoreNames.contains(MUSIC_TRACK_STORE)) {
+          database.createObjectStore(MUSIC_TRACK_STORE, { keyPath: "id" });
+        }
+        if (!database.objectStoreNames.contains(MUSIC_ARTWORK_STORE)) {
+          database.createObjectStore(MUSIC_ARTWORK_STORE, { keyPath: "id" });
         }
       };
       request.onsuccess = () => resolve(request.result);
@@ -282,6 +333,15 @@
     const database = await openSoundDatabase();
     return new Promise((resolve, reject) => {
       const request = database.transaction(storeName, "readwrite").objectStore(storeName).put(record);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async function deleteStoredRecord(storeName, id) {
+    const database = await openSoundDatabase();
+    return new Promise((resolve, reject) => {
+      const request = database.transaction(storeName, "readwrite").objectStore(storeName).delete(id);
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
     });
@@ -509,6 +569,438 @@
     elements.galleryImage.hidden = true;
     elements.galleryEmpty.hidden = false;
     elements.galleryEmpty.textContent = "This image is missing or unreadable";
+  }
+
+  function loadMusicState() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(MUSIC_STATE_KEY));
+      if (saved && typeof saved === "object") musicState = { ...musicState, ...saved };
+    } catch (error) {
+      // Use safe defaults when older player state is unreadable.
+    }
+    musicState.volume = numberInRange(musicState.volume, 0, 100, 70);
+    musicState.shuffle = musicState.shuffle === true;
+    musicState.repeat = ["off", "all", "one"].includes(musicState.repeat) ? musicState.repeat : "off";
+    musicState.albumId = typeof musicState.albumId === "string" ? musicState.albumId : "";
+    musicState.trackId = typeof musicState.trackId === "string" ? musicState.trackId : "";
+    musicState.position = numberInRange(musicState.position, 0, Number.MAX_SAFE_INTEGER, 0);
+  }
+
+  function saveMusicState() {
+    const position = elements.musicAudio && Number.isFinite(elements.musicAudio.currentTime)
+      ? elements.musicAudio.currentTime
+      : musicState.position;
+    musicState = {
+      albumId: selectedMusicAlbumId,
+      trackId: selectedMusicTrackId,
+      position,
+      volume: Number(elements.musicVolume.value),
+      shuffle: elements.musicShuffle.getAttribute("aria-pressed") === "true",
+      repeat: elements.musicRepeat.dataset.mode || "off"
+    };
+    try {
+      localStorage.setItem(MUSIC_STATE_KEY, JSON.stringify(musicState));
+    } catch (error) {
+      // Playback still works when preference storage is unavailable.
+    }
+  }
+
+  function musicAlbumId(artist, album) {
+    return `album:${artist.trim().toLocaleLowerCase()}|${album.trim().toLocaleLowerCase()}`;
+  }
+
+  function musicTitle(filename) {
+    return filename
+      .replace(/\.[^.]+$/, "")
+      .replace(/^\s*\d{1,3}[\s._-]+/, "")
+      .replace(/[_]+/g, " ")
+      .trim() || "Untitled Track";
+  }
+
+  function formatMusicTime(seconds) {
+    if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
+    const whole = Math.floor(seconds);
+    const hours = Math.floor(whole / 3600);
+    const minutes = Math.floor((whole % 3600) / 60);
+    const remaining = String(whole % 60).padStart(2, "0");
+    return hours ? `${hours}:${String(minutes).padStart(2, "0")}:${remaining}` : `${minutes}:${remaining}`;
+  }
+
+  function setMusicError(message = "") {
+    elements.musicError.textContent = message;
+    elements.musicError.hidden = !message;
+  }
+
+  function selectedMusicAlbum() {
+    return musicAlbums.find((album) => album.id === selectedMusicAlbumId) || null;
+  }
+
+  function selectedMusicTrack() {
+    return musicTracks.find((track) => track.id === selectedMusicTrackId) || null;
+  }
+
+  function syncMusicImportFields() {
+    const album = selectedMusicAlbum();
+    if (!album) return;
+    elements.musicImportArtist.value = album.artist;
+    elements.musicImportAlbum.value = album.title;
+  }
+
+  function buildMusicAlbums() {
+    const grouped = new Map();
+    musicTracks.forEach((track) => {
+      if (!grouped.has(track.albumId)) {
+        grouped.set(track.albumId, {
+          id: track.albumId,
+          artist: track.artist,
+          title: track.album,
+          tracks: []
+        });
+      }
+      grouped.get(track.albumId).tracks.push(track);
+    });
+    musicAlbums = Array.from(grouped.values())
+      .map((album) => ({
+        ...album,
+        tracks: album.tracks.sort((a, b) => (a.addedAt || 0) - (b.addedAt || 0) || a.title.localeCompare(b.title))
+      }))
+      .sort((a, b) => a.artist.localeCompare(b.artist) || a.title.localeCompare(b.title));
+  }
+
+  function renderMusicArtwork() {
+    if (musicArtworkObjectUrl) {
+      URL.revokeObjectURL(musicArtworkObjectUrl);
+      musicArtworkObjectUrl = null;
+    }
+    const artwork = musicArtwork.find((item) => item.id === selectedMusicAlbumId);
+    if (!artwork || !artwork.blob) {
+      elements.musicArtworkImage.hidden = true;
+      elements.musicArtworkImage.removeAttribute("src");
+      elements.musicArtworkPlaceholder.hidden = false;
+      return;
+    }
+    musicArtworkObjectUrl = URL.createObjectURL(artwork.blob);
+    const album = selectedMusicAlbum();
+    elements.musicArtworkImage.alt = album ? `${album.title} album artwork` : "Album artwork";
+    elements.musicArtworkImage.src = musicArtworkObjectUrl;
+    elements.musicArtworkImage.hidden = false;
+    elements.musicArtworkPlaceholder.hidden = true;
+  }
+
+  function renderMusicOptions() {
+    elements.musicAlbumSelect.replaceChildren();
+    if (!musicAlbums.length) {
+      const option = document.createElement("option");
+      option.value = "";
+      option.textContent = "No albums imported";
+      elements.musicAlbumSelect.appendChild(option);
+    } else {
+      musicAlbums.forEach((album) => {
+        const option = document.createElement("option");
+        option.value = album.id;
+        option.textContent = `${album.artist} — ${album.title}`;
+        elements.musicAlbumSelect.appendChild(option);
+      });
+      elements.musicAlbumSelect.value = selectedMusicAlbumId;
+    }
+
+    elements.musicTrackSelect.replaceChildren();
+    const album = selectedMusicAlbum();
+    if (!album) {
+      const option = document.createElement("option");
+      option.value = "";
+      option.textContent = "No track selected";
+      elements.musicTrackSelect.appendChild(option);
+    } else {
+      album.tracks.forEach((track) => {
+        const option = document.createElement("option");
+        option.value = track.id;
+        option.textContent = track.title;
+        elements.musicTrackSelect.appendChild(option);
+      });
+      elements.musicTrackSelect.value = selectedMusicTrackId;
+    }
+
+    const hasTrack = Boolean(selectedMusicTrack());
+    const trackCount = musicTracks.length;
+    elements.musicLibraryCount.textContent = trackCount ? `${trackCount} track${trackCount === 1 ? "" : "s"}` : "Local";
+    elements.musicPrevious.disabled = !hasTrack;
+    elements.musicPlay.disabled = !hasTrack;
+    elements.musicNext.disabled = !hasTrack;
+    elements.musicShuffle.disabled = !hasTrack;
+    elements.musicRepeat.disabled = !hasTrack;
+    elements.musicSeek.disabled = !hasTrack;
+    elements.musicRemoveTrack.disabled = !hasTrack;
+    elements.musicRemoveAlbum.disabled = !album;
+    elements.musicShuffle.setAttribute("aria-pressed", String(musicState.shuffle));
+    elements.musicRepeat.dataset.mode = musicState.repeat;
+    elements.musicRepeat.textContent = musicState.repeat === "one" ? "Repeat One" : musicState.repeat === "all" ? "Repeat All" : "Repeat Off";
+    elements.musicRepeat.setAttribute("aria-label", elements.musicRepeat.textContent);
+    elements.musicVolume.value = musicState.volume;
+    elements.musicVolumeValue.textContent = `${musicState.volume}%`;
+    elements.musicAudio.volume = musicState.volume / 100;
+    renderMusicArtwork();
+  }
+
+  function clearLoadedMusic() {
+    elements.musicAudio.pause();
+    elements.musicAudio.removeAttribute("src");
+    elements.musicAudio.load();
+    if (musicObjectUrl) URL.revokeObjectURL(musicObjectUrl);
+    musicObjectUrl = null;
+    selectedMusicTrackId = "";
+    elements.musicTrackTitle.textContent = "Local music library";
+    elements.musicTrackMeta.textContent = "Add audio files to begin";
+    elements.musicSeek.value = 0;
+    elements.musicCurrentTime.textContent = "0:00";
+    elements.musicDuration.textContent = "0:00";
+    elements.musicPlay.textContent = "▶";
+    elements.musicPlay.setAttribute("aria-label", "Play");
+  }
+
+  function loadSelectedMusicTrack({ restorePosition = false, continuePlayback = false } = {}) {
+    const track = selectedMusicTrack();
+    setMusicError();
+    if (!track || !track.blob) {
+      clearLoadedMusic();
+      renderMusicOptions();
+      if (track) setMusicError("This track is missing. Remove it and import the original file again.");
+      return;
+    }
+
+    elements.musicAudio.pause();
+    if (musicObjectUrl) URL.revokeObjectURL(musicObjectUrl);
+    musicObjectUrl = URL.createObjectURL(track.blob);
+    pendingMusicPosition = restorePosition && musicState.trackId === track.id ? musicState.position : 0;
+    lastMusicStateSecond = -1;
+    elements.musicAudio.src = musicObjectUrl;
+    elements.musicAudio.load();
+    elements.musicTrackTitle.textContent = track.title;
+    elements.musicTrackMeta.textContent = `${track.artist} · ${track.album}`;
+    elements.musicTrackSelect.value = track.id;
+    elements.musicSeek.value = 0;
+    elements.musicCurrentTime.textContent = "0:00";
+    elements.musicDuration.textContent = "0:00";
+    elements.musicPlay.textContent = "▶";
+    elements.musicPlay.setAttribute("aria-label", "Play");
+    saveMusicState();
+
+    if (continuePlayback) {
+      elements.musicAudio.play().catch(() => setMusicError("Playback could not start. Try a different audio format."));
+    }
+  }
+
+  async function loadMusicLibrary({ preferAlbumId = "", preferTrackId = "", restorePosition = false } = {}) {
+    try {
+      [musicTracks, musicArtwork] = await Promise.all([
+        getAllStoredRecords(MUSIC_TRACK_STORE),
+        getAllStoredRecords(MUSIC_ARTWORK_STORE)
+      ]);
+    } catch (error) {
+      musicTracks = [];
+      musicArtwork = [];
+      setMusicError("The local music library is unavailable in this browser.");
+    }
+    buildMusicAlbums();
+    const requestedAlbum = preferAlbumId || musicState.albumId;
+    selectedMusicAlbumId = musicAlbums.some((album) => album.id === requestedAlbum)
+      ? requestedAlbum
+      : (musicAlbums[0] ? musicAlbums[0].id : "");
+    const album = selectedMusicAlbum();
+    const requestedTrack = preferTrackId || musicState.trackId;
+    selectedMusicTrackId = album && album.tracks.some((track) => track.id === requestedTrack)
+      ? requestedTrack
+      : (album && album.tracks[0] ? album.tracks[0].id : "");
+    renderMusicOptions();
+    syncMusicImportFields();
+    if (selectedMusicTrackId) loadSelectedMusicTrack({ restorePosition });
+    else clearLoadedMusic();
+  }
+
+  function changeMusicTrack(trackId, { continuePlayback = false } = {}) {
+    const track = musicTracks.find((item) => item.id === trackId);
+    if (!track) return;
+    selectedMusicAlbumId = track.albumId;
+    selectedMusicTrackId = track.id;
+    renderMusicOptions();
+    loadSelectedMusicTrack({ continuePlayback });
+  }
+
+  function moveMusicTrack(direction, { continuePlayback = !elements.musicAudio.paused } = {}) {
+    const album = selectedMusicAlbum();
+    if (!album || !album.tracks.length) return;
+    if (direction < 0 && elements.musicAudio.currentTime > 4) {
+      elements.musicAudio.currentTime = 0;
+      return;
+    }
+    let index = album.tracks.findIndex((track) => track.id === selectedMusicTrackId);
+    if (musicState.shuffle && album.tracks.length > 1) {
+      index = randomIndex(album.tracks.length, index);
+    } else {
+      index = (index + direction + album.tracks.length) % album.tracks.length;
+    }
+    changeMusicTrack(album.tracks[index].id, { continuePlayback });
+  }
+
+  function toggleMusicPlayback() {
+    if (!selectedMusicTrack()) return;
+    setMusicError();
+    if (elements.musicAudio.paused) {
+      elements.musicAudio.play().catch(() => setMusicError("This track could not be played. Try MP3, M4A, or WAV."));
+    } else {
+      elements.musicAudio.pause();
+    }
+  }
+
+  function handleMusicEnded() {
+    const album = selectedMusicAlbum();
+    if (!album) return;
+    if (musicState.repeat === "one") {
+      elements.musicAudio.currentTime = 0;
+      elements.musicAudio.play().catch(() => {});
+      return;
+    }
+    const index = album.tracks.findIndex((track) => track.id === selectedMusicTrackId);
+    if (index < album.tracks.length - 1 || musicState.repeat === "all" || musicState.shuffle) {
+      moveMusicTrack(1, { continuePlayback: true });
+      return;
+    }
+    elements.musicAudio.currentTime = 0;
+    saveMusicState();
+  }
+
+  function handleMusicMetadata() {
+    const duration = elements.musicAudio.duration;
+    elements.musicDuration.textContent = formatMusicTime(duration);
+    if (pendingMusicPosition > 0 && Number.isFinite(duration)) {
+      elements.musicAudio.currentTime = Math.min(pendingMusicPosition, Math.max(0, duration - 0.25));
+    }
+    pendingMusicPosition = 0;
+  }
+
+  function handleMusicTimeUpdate() {
+    const duration = elements.musicAudio.duration;
+    const current = elements.musicAudio.currentTime;
+    elements.musicCurrentTime.textContent = formatMusicTime(current);
+    elements.musicDuration.textContent = formatMusicTime(duration);
+    elements.musicSeek.value = Number.isFinite(duration) && duration > 0 ? Math.round((current / duration) * 1000) : 0;
+    const second = Math.floor(current / 5);
+    if (second !== lastMusicStateSecond) {
+      lastMusicStateSecond = second;
+      saveMusicState();
+    }
+  }
+
+  function handleMusicSeek() {
+    const duration = elements.musicAudio.duration;
+    if (!Number.isFinite(duration) || duration <= 0) return;
+    elements.musicAudio.currentTime = (Number(elements.musicSeek.value) / 1000) * duration;
+    saveMusicState();
+  }
+
+  function toggleMusicShuffle() {
+    musicState.shuffle = !musicState.shuffle;
+    elements.musicShuffle.setAttribute("aria-pressed", String(musicState.shuffle));
+    saveMusicState();
+  }
+
+  function cycleMusicRepeat() {
+    const modes = ["off", "all", "one"];
+    musicState.repeat = modes[(modes.indexOf(musicState.repeat) + 1) % modes.length];
+    elements.musicRepeat.dataset.mode = musicState.repeat;
+    elements.musicRepeat.textContent = musicState.repeat === "one" ? "Repeat One" : musicState.repeat === "all" ? "Repeat All" : "Repeat Off";
+    elements.musicRepeat.setAttribute("aria-label", elements.musicRepeat.textContent);
+    saveMusicState();
+  }
+
+  async function importMusicTracks(event) {
+    const files = Array.from(event.target.files || []).slice(0, 100);
+    event.target.value = "";
+    if (!files.length) return;
+    const artist = elements.musicImportArtist.value.trim();
+    const album = elements.musicImportAlbum.value.trim();
+    if (!artist || !album) {
+      showToast("Enter an artist and album before adding tracks");
+      return;
+    }
+    const albumId = musicAlbumId(artist, album);
+    const existingNames = new Set(musicTracks.filter((track) => track.albumId === albumId).map((track) => track.name.toLocaleLowerCase()));
+    let added = 0;
+    let lastTrackId = "";
+
+    for (const file of files) {
+      if (file.size > 512 * 1024 * 1024 || existingNames.has(file.name.toLocaleLowerCase())) continue;
+      const id = newSoundId();
+      try {
+        await storeRecord(MUSIC_TRACK_STORE, {
+          id,
+          albumId,
+          artist,
+          album,
+          title: musicTitle(file.name),
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          blob: file,
+          addedAt: Date.now() + added
+        });
+        existingNames.add(file.name.toLocaleLowerCase());
+        lastTrackId = id;
+        added += 1;
+      } catch (error) {
+        setMusicError("Local storage filled before every track could be added. Keep the originals in Files.");
+        break;
+      }
+    }
+
+    await loadMusicLibrary({ preferAlbumId: albumId, preferTrackId: lastTrackId });
+    showToast(added ? `${added} track${added === 1 ? "" : "s"} added locally` : "No new compatible tracks were added");
+  }
+
+  async function importMusicArtwork(event) {
+    const file = event.target.files && event.target.files[0];
+    event.target.value = "";
+    if (!file) return;
+    const artist = elements.musicImportArtist.value.trim();
+    const album = elements.musicImportAlbum.value.trim();
+    if (!artist || !album) {
+      showToast("Enter an artist and album before adding artwork");
+      return;
+    }
+    if (file.size > 15 * 1024 * 1024) {
+      showToast("Album artwork must be smaller than 15 MB");
+      return;
+    }
+    try {
+      await validateImage(file);
+      const albumId = musicAlbumId(artist, album);
+      await storeRecord(MUSIC_ARTWORK_STORE, { id: albumId, artist, album, name: file.name, type: file.type, blob: file, addedAt: Date.now() });
+      await loadMusicLibrary({ preferAlbumId: albumId, preferTrackId: selectedMusicTrackId });
+      showToast("Album artwork added locally");
+    } catch (error) {
+      showToast("That album artwork could not be added");
+    }
+  }
+
+  async function removeSelectedMusicTrack() {
+    const track = selectedMusicTrack();
+    if (!track || !window.confirm(`Remove ${track.title} from this device?`)) return;
+    const wasPlaying = !elements.musicAudio.paused;
+    elements.musicAudio.pause();
+    await deleteStoredRecord(MUSIC_TRACK_STORE, track.id);
+    await loadMusicLibrary({ preferAlbumId: track.albumId });
+    if (wasPlaying) setMusicError("Playback stopped because the current track was removed.");
+    showToast("Track removed from this device");
+  }
+
+  async function removeSelectedMusicAlbum() {
+    const album = selectedMusicAlbum();
+    if (!album || !window.confirm(`Remove ${album.title} and all of its tracks from this device?`)) return;
+    elements.musicAudio.pause();
+    for (const track of album.tracks) await deleteStoredRecord(MUSIC_TRACK_STORE, track.id);
+    await deleteStoredRecord(MUSIC_ARTWORK_STORE, album.id);
+    await loadMusicLibrary();
+    showToast("Album removed from this device");
   }
 
   async function refreshSoundOptions() {
@@ -1153,16 +1645,61 @@
   elements.nextImage.addEventListener("click", () => moveGallery(1));
   elements.galleryUpload.addEventListener("change", uploadGalleryImages);
   elements.galleryImage.addEventListener("error", handleGalleryImageError);
+  elements.musicAlbumSelect.addEventListener("change", () => {
+    selectedMusicAlbumId = elements.musicAlbumSelect.value;
+    const album = selectedMusicAlbum();
+    selectedMusicTrackId = album && album.tracks[0] ? album.tracks[0].id : "";
+    renderMusicOptions();
+    syncMusicImportFields();
+    loadSelectedMusicTrack();
+  });
+  elements.musicTrackSelect.addEventListener("change", () => changeMusicTrack(elements.musicTrackSelect.value));
+  elements.musicPrevious.addEventListener("click", () => moveMusicTrack(-1));
+  elements.musicPlay.addEventListener("click", toggleMusicPlayback);
+  elements.musicNext.addEventListener("click", () => moveMusicTrack(1));
+  elements.musicShuffle.addEventListener("click", toggleMusicShuffle);
+  elements.musicRepeat.addEventListener("click", cycleMusicRepeat);
+  elements.musicSeek.addEventListener("input", handleMusicSeek);
+  elements.musicVolume.addEventListener("input", () => {
+    musicState.volume = Number(elements.musicVolume.value);
+    elements.musicAudio.volume = musicState.volume / 100;
+    elements.musicVolumeValue.textContent = `${musicState.volume}%`;
+    saveMusicState();
+  });
+  elements.musicTrackUpload.addEventListener("change", importMusicTracks);
+  elements.musicCoverUpload.addEventListener("change", importMusicArtwork);
+  elements.musicRemoveTrack.addEventListener("click", removeSelectedMusicTrack);
+  elements.musicRemoveAlbum.addEventListener("click", removeSelectedMusicAlbum);
+  elements.musicAudio.addEventListener("loadedmetadata", handleMusicMetadata);
+  elements.musicAudio.addEventListener("timeupdate", handleMusicTimeUpdate);
+  elements.musicAudio.addEventListener("ended", handleMusicEnded);
+  elements.musicAudio.addEventListener("play", () => {
+    elements.musicPlay.textContent = "❚❚";
+    elements.musicPlay.setAttribute("aria-label", "Pause");
+  });
+  elements.musicAudio.addEventListener("pause", () => {
+    elements.musicPlay.textContent = "▶";
+    elements.musicPlay.setAttribute("aria-label", "Play");
+    saveMusicState();
+  });
+  elements.musicAudio.addEventListener("error", () => setMusicError("This track is missing or uses an unsupported audio format."));
   document.addEventListener("keydown", handleTypingSound);
   document.addEventListener("keydown", handleKeyboard);
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden") saveDraft();
+    if (document.visibilityState === "hidden") {
+      saveDraft();
+      saveMusicState();
+    }
   });
-  window.addEventListener("pagehide", () => saveDraft());
+  window.addEventListener("pagehide", () => {
+    saveDraft();
+    saveMusicState();
+  });
   window.addEventListener("online", updateConnectionStatus);
   window.addEventListener("offline", updateConnectionStatus);
 
   loadAtmosphere();
+  loadMusicState();
   applyTheme(preferredTheme());
   updateConnectionStatus();
   applyAtmosphere();
@@ -1170,13 +1707,14 @@
   refreshSoundOptions();
   loadCharacterModules();
   loadGallery();
+  loadMusicLibrary({ restorePosition: true });
   loadDraft();
   updateCounts();
   resizeEditor();
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260719-2")
+      navigator.serviceWorker.register("./service-worker.js?v=20260719-3")
         .then((registration) => registration.update())
         .catch((error) => {
           if (!navigator.serviceWorker.controller) {

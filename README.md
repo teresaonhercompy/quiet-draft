@@ -1,6 +1,6 @@
 # Dreamspeak Command Center — Quiet Draft
 
-Dreamspeak Command Center is a dark, local-first creative shell built around Quiet Draft, its distraction-free scene editor for iPad. Phase 2 adds character facts, Mabel encouragement, and an image-preview module while keeping all working Quiet Draft behavior intact. It runs entirely in the browser, saves the current draft on the device, and works offline after its first successful load.
+Dreamspeak Command Center is a dark, local-first creative shell built around Quiet Draft, its distraction-free scene editor for iPad. Phase 3 adds a private local discography player while keeping every writing and supporting-module behavior intact. It runs entirely in the browser, saves the current draft on the device, and works offline after its first successful load.
 
 There is no login, cloud sync, AI, analytics, or external service. Draft text is stored only in the browser's local storage. Export or copy the text when you are ready to move it into Scrivener.
 
@@ -12,6 +12,8 @@ There is no login, cloud sync, AI, analytics, or external service. Draft text is
 - Random authored Mabel messages with a manual **Next Message** control
 - Offline image preview with previous, random, and next controls
 - Private gallery-image imports stored only on the current device
+- Private local discography with albums, tracks, artwork, seek, volume, shuffle, and repeat
+- Remembered music selection and playback position without autoplay
 - Quiet placeholders for future music, tools, and the separate local Wiki
 - Full-screen, responsive writing space
 - Automatic local saving while you type
@@ -111,6 +113,14 @@ The import file format is:
   ]
 }
 ```
+
+## Private local discography
+
+Open **Manage Local Library** in the Discography card. Enter the artist and album, choose **Add Tracks**, and select the corresponding audio files from Files. Use **Add Album Art** to associate a local image with the same artist and album.
+
+Audio and artwork are copied into IndexedDB only after an explicit import. They are not committed, uploaded, streamed, or placed in the service-worker cache. The player never starts automatically. It remembers the selected track, approximate position, volume, shuffle, and repeat preferences for the next launch.
+
+MP3, M4A, and WAV are the safest iPad formats. Browser support for AAC, CAF, AIFF, and OGG depends on the file's codec. Import one album at a time, retain every original in Files, and remember that Safari may remove local website data when storage is cleared or under device pressure.
 
 ## Optional local background images
 
