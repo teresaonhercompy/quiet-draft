@@ -48,6 +48,8 @@ Stop the server by returning to Terminal and pressing `Control-C`.
 
 ## Add to the iPad Home Screen
 
+For a complete walkthrough—including private on-device background images, custom typing sounds, offline testing, backups, and troubleshooting—see [IPAD_SETUP.md](IPAD_SETUP.md).
+
 For reliable offline installation, the app must be opened from a secure `https://` address. Upload the contents of this folder unchanged to any static HTTPS web host you control. The host only serves the app files; draft text stays in Safari on the iPad and is never uploaded by Quiet Draft.
 
 Then on the iPad:
