@@ -1,11 +1,14 @@
-# Quiet Draft
+# Dreamspeak Command Center — Quiet Draft
 
-Quiet Draft is a small, distraction-free writing app for drafting novel scenes on an iPad. It runs entirely in the browser, saves the current draft on the device, and works offline after its first successful load.
+Dreamspeak Command Center is a dark, local-first creative shell built around Quiet Draft, its distraction-free scene editor for iPad. Phase 1 adds the responsive Command Center layout and future-module placeholders while keeping all working Quiet Draft behavior intact. It runs entirely in the browser, saves the current draft on the device, and works offline after its first successful load.
 
 There is no login, cloud sync, AI, analytics, or external service. Draft text is stored only in the browser's local storage. Export or copy the text when you are ready to move it into Scrivener.
 
 ## Features
 
+- Dark, responsive Command Center shell with a three-column iPad-landscape layout
+- Editor-first portrait layout with supporting modules stacked afterward
+- Quiet placeholders for future facts, encouragement, imagery, music, tools, and the separate local Wiki
 - Full-screen, responsive writing space
 - Automatic local saving while you type
 - Manual **Save Locally** button and `Command-S` shortcut
@@ -57,8 +60,8 @@ Then on the iPad:
 1. Open the HTTPS address in Safari while online.
 2. Tap the **Share** button.
 3. Choose **Add to Home Screen**. If it is not visible, choose **Edit Actions** and add it.
-4. Confirm the name **Quiet Draft**, then tap **Add**.
-5. Launch Quiet Draft once from the new Home Screen icon while online so the offline files can finish caching.
+4. Confirm the name **Dreamspeak**, then tap **Add**.
+5. Launch Dreamspeak once from the new Home Screen icon while online so the offline files can finish caching.
 6. Test by turning on Airplane Mode and reopening the app.
 
 Safari controls each site's local storage. Clearing Safari website data or removing its stored data can erase the current draft, so use **Export .txt** regularly for anything important.

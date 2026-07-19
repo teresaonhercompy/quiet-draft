@@ -3,33 +3,46 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#f3efe7" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#171816" media="(prefers-color-scheme: dark)">
-    <meta name="description" content="A quiet, private writing space for drafting scenes offline.">
+    <meta name="theme-color" content="#0d0b12">
+    <meta name="description" content="A private, local-first writing command center for the Dreamspeak universe.">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Quiet Draft">
-    <link rel="manifest" href="manifest.webmanifest?v=20260718-5">
-    <link rel="icon" href="icon.svg?v=20260718-5" type="image/svg+xml">
-    <link rel="stylesheet" href="styles.css?v=20260718-5">
-    <title>Quiet Draft</title>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Dreamspeak">
+    <link rel="manifest" href="manifest.webmanifest?v=20260719-1">
+    <link rel="icon" href="icon.svg?v=20260719-1" type="image/svg+xml">
+    <link rel="stylesheet" href="styles.css?v=20260719-1">
+    <title>Dreamspeak Command Center</title>
   </head>
   <body>
     <div class="app-shell">
-      <header class="topbar" aria-label="Draft controls">
-        <div class="brand" aria-label="Quiet Draft">
+      <header class="topbar" aria-label="Command Center header">
+        <div class="brand-lockup" aria-label="Dreamspeak Command Center">
           <span class="brand-mark" aria-hidden="true"></span>
-          <span>Quiet Draft</span>
+          <span class="brand-copy">
+            <strong>Dreamspeak</strong>
+            <small>Command Center</small>
+          </span>
         </div>
 
-        <div class="actions">
+        <div class="project-context" aria-label="Current workspace">
+          <span>Inheritance Dust</span>
+          <span aria-hidden="true">/</span>
+          <strong>Write</strong>
+        </div>
+
+        <div class="connection-pill" id="connection-status" role="status" aria-live="polite">
+          <span class="connection-dot" aria-hidden="true"></span>
+          <span class="connection-label">Local first</span>
+        </div>
+
+        <div class="actions" aria-label="Draft controls">
           <button class="button button-quiet" id="new-draft" type="button">New Draft</button>
-          <button class="button" id="save-draft" type="button">Save Locally</button>
+          <button class="button button-primary" id="save-draft" type="button">Save Locally</button>
           <button class="button button-quiet" id="export-draft" type="button">Export .txt</button>
           <button class="button button-quiet" id="copy-draft" type="button">Copy All</button>
           <button class="button button-quiet" id="atmosphere-toggle" type="button" aria-expanded="false" aria-controls="atmosphere-panel">Atmosphere</button>
-          <button class="icon-button" id="theme-toggle" type="button" aria-label="Use dark mode" title="Toggle light or dark mode">
-            <span class="theme-icon" aria-hidden="true">☾</span>
+          <button class="icon-button" id="theme-toggle" type="button" aria-label="Use light mode" title="Toggle light or dark mode">
+            <span class="theme-icon" aria-hidden="true">☀</span>
           </button>
           <button class="icon-button focus-button" id="focus-toggle" type="button" aria-label="Enter focus mode" title="Focus mode (⌘⇧F)">
             <span aria-hidden="true">⌗</span>
@@ -37,45 +50,172 @@
         </div>
       </header>
 
-      <main class="writing-space">
-        <div class="page" data-editor-style="dark-glass">
-          <label class="visually-hidden" for="draft-title">Draft title</label>
-          <input
-            id="draft-title"
-            class="title-input"
-            type="text"
-            value="Untitled Draft"
-            maxlength="120"
-            autocomplete="off"
-            spellcheck="true"
-            enterkeyhint="next"
-            aria-label="Draft title"
-          >
-
-          <label class="visually-hidden" for="draft-body">Draft text</label>
-          <textarea
-            id="draft-body"
-            class="draft-input"
-            placeholder="Begin here…"
-            autocapitalize="sentences"
-            autocomplete="off"
-            autocorrect="on"
-            spellcheck="true"
-            aria-label="Draft text"
-          ></textarea>
+      <section class="highlights-strip" aria-labelledby="highlights-title">
+        <div class="highlights-heading">
+          <span class="eyebrow">Writing room</span>
+          <h1 id="highlights-title">Highlights</h1>
         </div>
+        <div class="highlight-list">
+          <div class="highlight-item">
+            <span>Current novel</span>
+            <strong>Inheritance Dust</strong>
+          </div>
+          <div class="highlight-item">
+            <span>Workspace</span>
+            <strong>Quiet Draft</strong>
+          </div>
+          <div class="highlight-item">
+            <span>Draft safety</span>
+            <strong><span class="mini-status" aria-hidden="true"></span>On this device</strong>
+          </div>
+          <div class="highlight-item">
+            <span>Build</span>
+            <strong>Phase 1 · Shell</strong>
+          </div>
+        </div>
+      </section>
+
+      <main class="command-grid">
+        <aside class="rail left-rail" aria-label="Character modules">
+          <section class="module-card placeholder-card" aria-labelledby="fact-card-title">
+            <div class="module-heading">
+              <div>
+                <span class="eyebrow">Character signal</span>
+                <h2 id="fact-card-title">Tabi &amp; Norielle</h2>
+              </div>
+              <span class="placeholder-badge">Phase 2</span>
+            </div>
+            <div class="character-orbit" aria-hidden="true">
+              <span>T</span>
+              <span>N</span>
+            </div>
+            <p class="placeholder-copy">Their authored fact library will live here without interrupting the page.</p>
+            <button class="module-button" type="button" disabled>Facts coming later</button>
+          </section>
+
+          <section class="module-card placeholder-card" aria-labelledby="mabel-card-title">
+            <div class="module-heading">
+              <div>
+                <span class="eyebrow">A quiet word</span>
+                <h2 id="mabel-card-title">Mabel</h2>
+              </div>
+              <span class="placeholder-badge">Phase 2</span>
+            </div>
+            <blockquote class="placeholder-quote">“The encouragement can wait. The sentence cannot.”</blockquote>
+            <p class="placeholder-copy">An authored, local message library will replace this placeholder.</p>
+          </section>
+        </aside>
+
+        <section class="center-workspace" aria-label="Main writing workspace">
+          <section class="module-card tool-switcher" aria-labelledby="tool-switcher-title">
+            <div class="tool-switcher-copy">
+              <span class="eyebrow">Workspace</span>
+              <h2 id="tool-switcher-title">Tool Center</h2>
+            </div>
+            <div class="tool-tabs" role="toolbar" aria-label="Command Center tools">
+              <button class="tool-tab active" type="button" aria-pressed="true">Write</button>
+              <button class="tool-tab" type="button" disabled>Wiki</button>
+              <button class="tool-tab" type="button" disabled>Images</button>
+              <button class="tool-tab" type="button" disabled>Music</button>
+            </div>
+            <p class="tool-note"><strong>Wiki placeholder:</strong> the private archive remains separate and local.</p>
+          </section>
+
+          <section class="editor-module" aria-labelledby="editor-module-title">
+            <header class="editor-chrome">
+              <div>
+                <span class="eyebrow">Primary workspace</span>
+                <h2 id="editor-module-title">Quiet Draft</h2>
+              </div>
+              <span class="private-badge">
+                <span aria-hidden="true">◆</span>
+                Private · Local
+              </span>
+            </header>
+
+            <div class="writing-space">
+              <div class="page" data-editor-style="dark-glass">
+                <label class="visually-hidden" for="draft-title">Draft title</label>
+                <input
+                  id="draft-title"
+                  class="title-input"
+                  type="text"
+                  value="Untitled Draft"
+                  maxlength="120"
+                  autocomplete="off"
+                  spellcheck="true"
+                  enterkeyhint="next"
+                  aria-label="Draft title"
+                >
+
+                <label class="visually-hidden" for="draft-body">Draft text</label>
+                <textarea
+                  id="draft-body"
+                  class="draft-input"
+                  placeholder="Begin here…"
+                  autocapitalize="sentences"
+                  autocomplete="off"
+                  autocorrect="on"
+                  spellcheck="true"
+                  aria-label="Draft text"
+                ></textarea>
+              </div>
+            </div>
+
+            <footer class="statusbar" aria-label="Draft status">
+              <div class="save-state">
+                <span class="status-dot" aria-hidden="true"></span>
+                <span id="save-status" role="status" aria-live="polite">Saved locally</span>
+              </div>
+              <div class="counts" aria-live="polite">
+                <span><strong id="word-count">0</strong> words</span>
+                <span><strong id="character-count">0</strong> characters</span>
+              </div>
+            </footer>
+          </section>
+        </section>
+
+        <aside class="rail right-rail" aria-label="Media modules">
+          <section class="module-card placeholder-card image-card" aria-labelledby="image-card-title">
+            <div class="module-heading">
+              <div>
+                <span class="eyebrow">Visual archive</span>
+                <h2 id="image-card-title">Image Preview</h2>
+              </div>
+              <span class="placeholder-badge">Phase 2</span>
+            </div>
+            <div class="image-placeholder" role="img" aria-label="Empty local image gallery placeholder">
+              <span class="image-moon" aria-hidden="true"></span>
+              <span class="image-horizon" aria-hidden="true"></span>
+              <span>Local gallery placeholder</span>
+            </div>
+            <p class="placeholder-copy">Private character and project art will be imported on each device.</p>
+          </section>
+
+          <section class="module-card placeholder-card music-card" aria-labelledby="music-card-title">
+            <div class="module-heading">
+              <div>
+                <span class="eyebrow">Listening room</span>
+                <h2 id="music-card-title">Discography</h2>
+              </div>
+              <span class="placeholder-badge">Phase 3</span>
+            </div>
+            <div class="album-placeholder" aria-hidden="true">
+              <span class="album-glyph">D</span>
+              <span class="album-ring"></span>
+            </div>
+            <div class="track-placeholder">
+              <strong>Local music library</strong>
+              <span>No track selected</span>
+            </div>
+            <div class="player-placeholder" aria-label="Music controls unavailable until Phase 3">
+              <button type="button" disabled aria-label="Previous track">‹</button>
+              <button class="play-placeholder" type="button" disabled aria-label="Play">▶</button>
+              <button type="button" disabled aria-label="Next track">›</button>
+            </div>
+          </section>
+        </aside>
       </main>
-
-      <footer class="statusbar" aria-label="Draft status">
-        <div class="save-state">
-          <span class="status-dot" aria-hidden="true"></span>
-          <span id="save-status" role="status" aria-live="polite">Saved locally</span>
-        </div>
-        <div class="counts" aria-live="polite">
-          <span><strong id="word-count">0</strong> words</span>
-          <span><strong id="character-count">0</strong> characters</span>
-        </div>
-      </footer>
 
       <button class="exit-focus" id="exit-focus" type="button" aria-label="Exit focus mode" title="Exit focus mode (Esc)">
         <span aria-hidden="true">⌗</span>
@@ -171,6 +311,6 @@
       <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
     </div>
 
-    <script src="app.js?v=20260718-5" defer></script>
+    <script src="app.js?v=20260719-1" defer></script>
   </body>
 </html>
