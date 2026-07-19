@@ -49,6 +49,9 @@
 - Added the versioned `dreamspeak.music-player.v1` preference key without changing any production Quiet Draft or Phase 2 key.
 - Added an empty public `data/albums.json` metadata shell and bumped the service-worker cache to `20260719-3`.
 - Confirmed that audio blobs are never placed in the app-shell/service-worker cache and no audio file is tracked by Git.
+- Deployed the Phase 3 shell and two iPad landscape scrolling fixes through cache `20260719-5`.
+- Added local ID3v2 MP3 parsing for title, artist, album, track number, and embedded artwork.
+- Added foreground-only playback so closing or backgrounding the app pauses audio while preserving position.
 
 ## In-progress work
 
@@ -58,8 +61,8 @@
 ## Known observations
 
 - The browser test surface could load and inspect local WAV metadata but could not output audio. Audible playback and playback-through-focus-mode require physical-iPad acceptance.
-- Track titles are derived from filenames; the app does not parse ID3 or other embedded metadata.
-- Import order becomes album track order. A simple leading track number is removed from the displayed title.
+- Tagged MP3 titles, artist, album, track number, and embedded art are read locally. Other formats use the import-field and filename fallbacks.
+- Tagged MP3 track numbers determine album order; unnumbered tracks retain import order.
 - Browser storage capacity and eviction behavior depend on available iPad storage and Safari. Original music and artwork must remain in Files or on the Mac.
 - Reimporting a file with the same filename into the same artist/album is skipped as a duplicate.
 - The four included backgrounds remain cosmetically duplicated in the Atmosphere menu, unchanged from prior phases.
@@ -70,13 +73,15 @@ No Phase 4 implementation is approved. The next task is Phase 3 review, deployme
 
 ## Last tested candidate
 
-- **Local candidate:** service-worker cache `20260719-3`
+- **Local candidate:** service-worker cache `20260719-6`
 - **Syntax/data validation:** passed for JavaScript and JSON
 - **Privacy:** no tracked audio; no audio in the service-worker app shell; test fixture hook removed before commit
 - **Empty library:** silent, stable, and all unavailable transport controls disabled
 - **Local library:** two-track private fixture loaded from IndexedDB with album and track selection
 - **Player state:** next track, shuffle, repeat-one, and 35% volume persisted across reload
 - **Autoplay:** restored track remained paused after every reload
+- **MP3 metadata:** synthetic ID3v2.3 title, artist, album, track 7, and embedded PNG artwork parsed correctly in the browser
+- **Background playback:** visibility and page-hide paths now pause before saving playback position
 - **Editor regression:** test title/body autosaved and restored exactly with the player loaded
 - **Focus mode:** player code does not pause on focus entry; audible continuation requires iPad verification
 - **iPad landscape:** 1180×820, three columns, no horizontal overflow
