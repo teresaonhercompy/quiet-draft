@@ -48,6 +48,7 @@
     removeSound: document.querySelector("#remove-sound"),
     themeToggle: document.querySelector("#theme-toggle"),
     themeIcon: document.querySelector(".theme-icon"),
+    connectionStatus: document.querySelector("#connection-status"),
     focusToggle: document.querySelector("#focus-toggle"),
     exitFocus: document.querySelector("#exit-focus"),
     wordCount: document.querySelector("#word-count"),
@@ -734,7 +735,7 @@
   function preferredTheme() {
     const saved = localStorage.getItem(THEME_KEY);
     if (saved === "light" || saved === "dark") return saved;
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    return "dark";
   }
 
   function applyTheme(theme) {
@@ -751,7 +752,15 @@
       themeMeta.dataset.active = "true";
       document.head.appendChild(themeMeta);
     }
-    themeMeta.content = theme === "dark" ? "#171816" : "#f3efe7";
+    themeMeta.content = theme === "dark" ? "#0d0b12" : "#dcd7df";
+  }
+
+  function updateConnectionStatus() {
+    if (!elements.connectionStatus) return;
+    const offline = navigator.onLine === false;
+    elements.connectionStatus.classList.toggle("offline", offline);
+    const label = elements.connectionStatus.querySelector(".connection-label");
+    if (label) label.textContent = offline ? "Offline ready" : "Local first";
   }
 
   function toggleTheme() {
@@ -858,9 +867,12 @@
     if (document.visibilityState === "hidden") saveDraft();
   });
   window.addEventListener("pagehide", () => saveDraft());
+  window.addEventListener("online", updateConnectionStatus);
+  window.addEventListener("offline", updateConnectionStatus);
 
   loadAtmosphere();
   applyTheme(preferredTheme());
+  updateConnectionStatus();
   applyAtmosphere();
   initializeBackgroundOptions();
   refreshSoundOptions();
@@ -870,7 +882,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260718-5")
+      navigator.serviceWorker.register("./service-worker.js?v=20260719-1")
         .then((registration) => registration.update())
         .catch((error) => {
           if (!navigator.serviceWorker.controller) {

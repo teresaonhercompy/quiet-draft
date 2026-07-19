@@ -1,6 +1,6 @@
-# Quiet Draft: iPad Setup and Local Atmosphere Guide
+# Dreamspeak Command Center: iPad Setup and Local Atmosphere Guide
 
-This guide covers installing the hosted Quiet Draft app on an iPad, preparing background images and typing sounds in the Files app, importing those assets privately onto the iPad, and using the app offline.
+This guide covers installing Dreamspeak Command Center with its Quiet Draft editor on an iPad, preparing background images and typing sounds in the Files app, importing those assets privately onto the iPad, and using the app offline.
 
 Quiet Draft is hosted at:
 
@@ -71,7 +71,7 @@ Very large images consume more local storage and may take longer to appear. A hi
 
 Each imported sound becomes a separate selectable style. Quiet Draft slightly lowers the playback pitch for Space and Enter, so a single short key sound can cover all three key types.
 
-## 2. Install Quiet Draft on the Home Screen
+## 2. Install Dreamspeak Command Center on the Home Screen
 
 1. Open **Safari** on the iPad.
 2. Visit <https://teresaonhercompy.github.io/quiet-draft/>.
@@ -79,8 +79,8 @@ Each imported sound becomes a separate selectable style. Quiet Draft slightly lo
 4. Tap Safari’s **Share** button.
 5. Tap **More** if necessary, then choose **Add to Home Screen**.
 6. Turn on **Open as Web App** when that option is shown.
-7. Leave the name as **Quiet Draft** and tap **Add**.
-8. Return to the Home Screen and open Quiet Draft from its new icon.
+7. Leave the name as **Dreamspeak** and tap **Add**.
+8. Return to the Home Screen and open Dreamspeak from its new icon.
 9. Keep the iPad online for about 10 seconds during this first launch.
 
 Apple’s current instructions use **Share → More → Add to Home Screen**, followed by **Open as Web App**: [Turn a website into an app in Safari on iPad](https://support.apple.com/en-ph/guide/ipad/ipad8f1f7a29/ipados/26).
@@ -289,4 +289,3 @@ Before leaving reliable internet access:
 - [ ] Test the chosen private background and typing sound.
 - [ ] Complete an Airplane Mode test.
 - [ ] Keep the original atmosphere assets in the Files app.
-

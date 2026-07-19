@@ -77,3 +77,38 @@
 
 **Consequences:** The tag must remain immutable. Restore instructions are recorded in the Phase 0 audit.
 
+## DCC-008 — Phase 1 supporting modules are structural placeholders only
+
+**Date:** 2026-07-19
+
+**Decision:** Phase 1 provides responsive card structure and clearly disabled controls for character facts, Mabel encouragement, image preview, discography, the tool center, and the Wiki. It does not add their data libraries, navigation logic, playback, image rotation, or search behavior.
+
+**Reason:** The approved phase is the Command Center shell. Implementing real module behavior now would bypass the incremental delivery plan and increase regression and privacy risk around the working editor.
+
+**Alternatives considered:** Build each visible module fully; omit the future modules entirely; add sample private data to make the shell appear complete.
+
+**Consequences:** The shell communicates the intended layout without pretending future tools work. Phase 2 and later phases can replace each placeholder independently without redesigning the center editor.
+
+## DCC-009 — Dark is the default only when no saved theme exists
+
+**Date:** 2026-07-19
+
+**Decision:** The Command Center loads dark by default for a new installation. Existing `quiet-draft.theme.v1` values continue to win, and the light-theme control remains available.
+
+**Reason:** The PRD requires a dark-first interface, while preservation requirements prohibit overriding a user's established preference.
+
+**Alternatives considered:** Remove light mode; force every installation to dark once; continue following the operating-system preference for new installs.
+
+**Consequences:** New users receive the intended cinematic dark shell. Existing users see no theme reset, and no storage migration or new key is required.
+
+## DCC-010 — Command Center PWA identity; Quiet Draft storage contract remains unchanged
+
+**Date:** 2026-07-19
+
+**Decision:** Update the document and manifest identity to Dreamspeak Command Center while keeping the same PWA scope, start location, GitHub Pages origin, draft keys, atmosphere keys, IndexedDB database, and object stores.
+
+**Reason:** The installed shell now represents the broader workspace, but preserving the origin and data identifiers is necessary for existing iPad drafts and local assets to reappear after the update.
+
+**Alternatives considered:** Publish a second PWA at another path; rename all browser-storage identifiers; keep the installed name Quiet Draft indefinitely.
+
+**Consequences:** The installed product presents the Command Center identity without copying or migrating user content. Quiet Draft remains the named editor module inside the shell.
