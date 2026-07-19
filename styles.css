@@ -309,6 +309,7 @@ button:disabled {
 .exit-focus:focus-visible,
 .module-button:focus-visible,
 .tool-tab:focus-visible,
+.highlight-input:focus-visible,
 .title-input:focus-visible,
 .draft-input:focus-visible {
   outline: 2px solid var(--color-accent);
@@ -364,7 +365,7 @@ button:disabled {
 
 .highlight-list {
   display: grid;
-  grid-template-columns: repeat(4, minmax(120px, 1fr));
+  grid-template-columns: repeat(8, minmax(98px, 1fr));
   min-width: 0;
   border: 1px solid var(--color-border);
   border-radius: 12px;
@@ -404,6 +405,51 @@ button:disabled {
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.highlight-editable {
+  cursor: text;
+}
+
+.highlight-input {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  border-radius: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+}
+
+.highlight-input:hover,
+.highlight-input:focus {
+  border-bottom-color: var(--color-border-strong);
+}
+
+.highlight-input::placeholder {
+  color: var(--color-text-faint);
+  opacity: 1;
+}
+
+.highlight-input[type="number"] {
+  appearance: textfield;
+}
+
+.highlight-input[type="number"]::-webkit-inner-spin-button,
+.highlight-input[type="number"]::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.metric-number strong,
+.metric-number input {
+  font-variant-numeric: tabular-nums;
 }
 
 .mini-status {
@@ -1859,7 +1905,7 @@ body.focus-mode .page {
   }
 
   .highlight-list {
-    grid-template-columns: repeat(4, minmax(145px, 1fr));
+    grid-template-columns: repeat(8, minmax(145px, 1fr));
     width: max-content;
     min-width: 100%;
   }
