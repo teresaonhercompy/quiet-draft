@@ -109,3 +109,7 @@ The **Dark Glass** editor appearance uses white text on a translucent charcoal p
 - `icon.svg` — local app icon
 
 No build step or package installation is required.
+
+## Dreamspeak Command Center project documents
+
+Future phased work is governed by the [product requirements](docs/PRD.md), [current project status](docs/PROJECT_STATUS.md), [decision log](docs/DECISIONS.md), and [Phase 0 safeguard audit](docs/PHASE_0_AUDIT.md). Read all four before changing application behavior or browser storage.
