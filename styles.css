@@ -428,6 +428,7 @@ button:disabled {
 
 .rail {
   display: grid;
+  grid-auto-rows: max-content;
   align-content: start;
   gap: 12px;
   overflow-y: auto;
