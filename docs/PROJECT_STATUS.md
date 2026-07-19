@@ -2,7 +2,7 @@
 
 **Updated:** 2026-07-19  
 **Current phase:** Phase 0 — Audit and Safeguard Existing Quiet Draft  
-**Phase state:** Implementation complete; ready for user acceptance on iPad  
+**Phase state:** Complete; user-accepted on iPad  
 **Current app version:** Quiet Draft Version 1 / service-worker cache `20260718-5`  
 **Production:** <https://teresaonhercompy.github.io/quiet-draft/>  
 **Repository:** <https://github.com/teresaonhercompy/quiet-draft>  
@@ -21,12 +21,12 @@
 - Verified the public GitHub Pages configuration, enforced HTTPS, and deployed service-worker version.
 - Published a recovery tag for the known-good pre-Command-Center baseline.
 - Added the approved PRD, decision log, and detailed Phase 0 audit documentation.
+- Received user acceptance after successful testing on the physical iPad, including offline operation in Airplane Mode.
 
 No application HTML, CSS, JavaScript, manifest, service-worker, or asset behavior was changed in Phase 0.
 
 ## In-progress work
 
-- User acceptance testing on the physical iPad, including Safari, installed PWA, portrait, landscape, Magic Keyboard, Airplane Mode, and opening an exported text file.
 - Review and merge of the Phase 0 documentation pull request.
 
 ## Known observations
@@ -52,17 +52,18 @@ No Phase 1 implementation is approved yet. After Phase 0 user acceptance and mer
 
 ## iPad acceptance checklist
 
-- [ ] Existing real draft appears before any test edits.
-- [ ] Typing with Magic Keyboard remains responsive.
-- [ ] Autosave survives closing and reopening the Home Screen app.
-- [ ] **Save Locally** reports success.
-- [ ] **Export .txt** creates a file that opens and contains the title and body.
-- [ ] **Copy All** pastes the complete title and body into a temporary note.
-- [ ] Background selection and Dark Glass remain readable in portrait and landscape.
-- [ ] A locally imported background remains available after relaunch.
-- [ ] A locally imported typing sound plays only after sounds are enabled.
-- [ ] Mute, volume, Space, and Enter variations work.
-- [ ] Focus mode enters and exits with touch and keyboard controls.
-- [ ] Airplane Mode launch succeeds after one online launch.
-- [ ] Current draft remains present after the Airplane Mode test.
+- [x] Existing real draft appears before any test edits.
+- [x] Typing with Magic Keyboard remains responsive.
+- [x] Autosave survives closing and reopening the Home Screen app.
+- [x] **Save Locally** reports success.
+- [x] **Export .txt** creates a file that opens and contains the title and body.
+- [x] **Copy All** pastes the complete title and body into a temporary note.
+- [x] Background selection and Dark Glass remain readable in portrait and landscape.
+- [x] A locally imported background remains available after relaunch.
+- [x] A locally imported typing sound plays only after sounds are enabled.
+- [x] Mute, volume, Space, and Enter variations work.
+- [x] Focus mode enters and exits with touch and keyboard controls.
+- [x] Airplane Mode launch succeeds after one online launch.
+- [x] Current draft remains present after the Airplane Mode test.
 
+**Acceptance recorded:** 2026-07-19. The user reported that the app works exactly as required on the iPad, including in Airplane Mode.

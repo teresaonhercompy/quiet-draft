@@ -142,11 +142,10 @@ Never force-reset a working branch as the first recovery step.
 
 ## 6. Phase 0 acceptance state
 
-- Existing Quiet Draft still works: **pass on isolated desktop baseline**.
-- Existing drafts remain accessible: **storage contract preserved; isolated reload pass; real iPad draft check pending user acceptance**.
+- Existing Quiet Draft still works: **pass on isolated desktop baseline and user-confirmed physical iPad test**.
+- Existing drafts remain accessible: **pass; storage contract preserved, isolated reload passed, and iPad behavior accepted by the user**.
 - Source control can restore the app: **pass; remote recovery tag published**.
 - Storage keys are documented: **pass**.
-- Baseline offline test succeeds: **pass on isolated desktop baseline; physical iPad Airplane Mode check pending**.
+- Baseline offline test succeeds: **pass on isolated desktop baseline and user-confirmed iPad Airplane Mode test**.
 
-Phase 1 must not begin until the user accepts the iPad checks and explicitly authorizes Phase 1.
-
+Phase 0 was accepted by the user on 2026-07-19. Phase 1 must not begin until the user explicitly authorizes it.
