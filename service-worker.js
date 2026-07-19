@@ -1,4 +1,4 @@
-const VERSION = "20260719-2";
+const VERSION = "20260719-3";
 const CACHE_NAME = `quiet-draft-${VERSION}`;
 const APP_SHELL = [
   "./",
@@ -10,6 +10,7 @@ const APP_SHELL = [
   "./data/facts.json",
   "./data/encouragement.json",
   "./data/gallery.json",
+  "./data/albums.json",
   "./backgrounds/forest-desk.jpg",
   "./backgrounds/night-sky.jpg",
   "./backgrounds/rainy-window.jpg",

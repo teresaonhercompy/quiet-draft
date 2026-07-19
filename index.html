@@ -8,9 +8,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Dreamspeak">
-    <link rel="manifest" href="manifest.webmanifest?v=20260719-2">
-    <link rel="icon" href="icon.svg?v=20260719-2" type="image/svg+xml">
-    <link rel="stylesheet" href="styles.css?v=20260719-2">
+    <link rel="manifest" href="manifest.webmanifest?v=20260719-3">
+    <link rel="icon" href="icon.svg?v=20260719-3" type="image/svg+xml">
+    <link rel="stylesheet" href="styles.css?v=20260719-3">
     <title>Dreamspeak Command Center</title>
   </head>
   <body>
@@ -70,7 +70,7 @@
           </div>
           <div class="highlight-item">
             <span>Build</span>
-            <strong>Phase 2 · Studio</strong>
+            <strong>Phase 3 · Listening</strong>
           </div>
         </div>
       </section>
@@ -214,27 +214,84 @@
             <input id="gallery-upload" class="visually-hidden" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.avif" multiple>
           </section>
 
-          <section class="module-card placeholder-card music-card" aria-labelledby="music-card-title">
+          <section class="module-card content-card music-card" aria-labelledby="music-card-title">
             <div class="module-heading">
               <div>
                 <span class="eyebrow">Listening room</span>
                 <h2 id="music-card-title">Discography</h2>
               </div>
-              <span class="placeholder-badge">Phase 3</span>
+              <span class="content-badge" id="music-library-count">Local</span>
             </div>
-            <div class="album-placeholder" aria-hidden="true">
-              <span class="album-glyph">D</span>
-              <span class="album-ring"></span>
+
+            <div class="album-artwork">
+              <img id="album-artwork-image" alt="" hidden>
+              <div class="album-placeholder" id="album-artwork-placeholder" aria-hidden="true">
+                <span class="album-glyph">D</span>
+                <span class="album-ring"></span>
+              </div>
             </div>
-            <div class="track-placeholder">
-              <strong>Local music library</strong>
-              <span>No track selected</span>
+
+            <label class="visually-hidden" for="music-album-select">Album</label>
+            <select class="music-select" id="music-album-select" aria-label="Album">
+              <option value="">No albums imported</option>
+            </select>
+            <label class="visually-hidden" for="music-track-select">Track</label>
+            <select class="music-select" id="music-track-select" aria-label="Track">
+              <option value="">No track selected</option>
+            </select>
+
+            <div class="now-playing" aria-live="polite">
+              <strong id="music-track-title">Local music library</strong>
+              <span id="music-track-meta">Add audio files to begin</span>
             </div>
-            <div class="player-placeholder" aria-label="Music controls unavailable until Phase 3">
-              <button type="button" disabled aria-label="Previous track">‹</button>
-              <button class="play-placeholder" type="button" disabled aria-label="Play">▶</button>
-              <button type="button" disabled aria-label="Next track">›</button>
+
+            <audio id="music-audio" preload="metadata"></audio>
+
+            <div class="seek-row">
+              <span id="music-current-time">0:00</span>
+              <input id="music-seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Track position" disabled>
+              <span id="music-duration">0:00</span>
             </div>
+
+            <div class="player-controls" aria-label="Music controls">
+              <button id="music-previous" type="button" aria-label="Previous track" disabled>‹</button>
+              <button class="play-control" id="music-play" type="button" aria-label="Play" disabled>▶</button>
+              <button id="music-next" type="button" aria-label="Next track" disabled>›</button>
+            </div>
+
+            <div class="playback-options">
+              <button id="music-shuffle" type="button" aria-pressed="false" disabled>Shuffle</button>
+              <button id="music-repeat" type="button" data-mode="off" aria-label="Repeat off" disabled>Repeat Off</button>
+            </div>
+
+            <div class="music-volume-row">
+              <label for="music-volume">Volume</label>
+              <input id="music-volume" type="range" min="0" max="100" value="70" step="1">
+              <output id="music-volume-value" for="music-volume">70%</output>
+            </div>
+
+            <p class="music-error" id="music-error" role="status" hidden></p>
+
+            <details class="music-library-manager">
+              <summary>Manage Local Library</summary>
+              <div class="music-library-fields">
+                <label for="music-import-artist">Artist</label>
+                <input id="music-import-artist" type="text" value="The Calamities" maxlength="100" autocomplete="off">
+                <label for="music-import-album">Album</label>
+                <input id="music-import-album" type="text" value="Local Library" maxlength="120" autocomplete="off">
+              </div>
+              <div class="music-import-actions">
+                <label class="module-button" for="music-track-upload">Add Tracks</label>
+                <input id="music-track-upload" class="visually-hidden" type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg,.caf,.aiff,.aif" multiple>
+                <label class="module-button secondary" for="music-cover-upload">Add Album Art</label>
+                <input id="music-cover-upload" class="visually-hidden" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.avif">
+              </div>
+              <div class="music-remove-actions">
+                <button class="text-button" id="music-remove-track" type="button" disabled>Remove Track</button>
+                <button class="text-button" id="music-remove-album" type="button" disabled>Remove Album</button>
+              </div>
+              <p>Music and artwork stay in this browser on this device. Keep the originals in Files.</p>
+            </details>
           </section>
         </aside>
       </main>
@@ -333,6 +390,6 @@
       <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
     </div>
 
-    <script src="app.js?v=20260719-2" defer></script>
+    <script src="app.js?v=20260719-3" defer></script>
   </body>
 </html>

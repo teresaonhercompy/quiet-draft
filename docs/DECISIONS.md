@@ -136,3 +136,39 @@
 **Alternatives considered:** Ship no bundled gallery; publish private character art; add newly generated public artwork; use remote image URLs.
 
 **Consequences:** The gallery works immediately and offline after installation. It begins with atmospheric scenes rather than character art, and private images appear only after local import.
+
+## DCC-013 — Phase 3 music is an explicitly imported device-local library
+
+**Date:** 2026-07-19
+
+**Decision:** Music tracks and album artwork are imported through browser file pickers and stored in new `music-tracks` and `music-artwork` object stores inside the existing `quiet-draft-assets` IndexedDB database. Artist and album metadata are entered at import time; track titles derive from filenames.
+
+**Reason:** The approved primary music source is private local audio. Explicit imports preserve privacy, work offline, avoid external services, and support the user's sub-100-song library without publishing any files.
+
+**Alternatives considered:** Commit audio to GitHub; stream from YouTube Music; require a catalog server; parse embedded tags with an external library; use temporary file handles that may not survive relaunch.
+
+**Consequences:** Each device needs its own import. Audio consumes browser storage, originals must remain backed up, and availability depends on Safari codec support. IndexedDB upgrades from version 3 to version 4 while every existing store and record remains intact.
+
+## DCC-014 — Remember playback state, never playback intent
+
+**Date:** 2026-07-19
+
+**Decision:** Store the last album, track, approximate position, volume, shuffle, and repeat mode in `dreamspeak.music-player.v1`. Do not store or restore a playing state. Audio begins only after an explicit Play action.
+
+**Reason:** The PRD requires continuity without autoplay. Restoring location is useful; restoring sound would be disruptive and may violate browser media policies.
+
+**Alternatives considered:** Start the last track automatically; forget all playback state; remember only volume; rely on the audio element's transient state.
+
+**Consequences:** Relaunching always shows a paused player at the remembered position. Focus mode and editor interactions do not intentionally pause playback, but iPadOS may still apply operating-system media policies.
+
+## DCC-015 — Service worker never caches the private music library
+
+**Date:** 2026-07-19
+
+**Decision:** Cache only the lightweight public `data/albums.json` shell with the app. Imported audio and artwork remain IndexedDB blobs and are never added to the service-worker app-shell list.
+
+**Reason:** Explicit local imports are already offline and private. Duplicating the full library in Cache Storage would waste space and complicate deletion and quota behavior.
+
+**Alternatives considered:** Automatically cache every imported track; publish and cache remote music; implement per-album service-worker downloads.
+
+**Consequences:** The app shell remains lightweight. Removing an imported track deletes its authoritative local blob without leaving a second service-worker copy.
