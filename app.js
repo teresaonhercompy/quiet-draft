@@ -14,7 +14,18 @@
   const MUSIC_ARTWORK_STORE = "music-artwork";
   const MUSIC_STATE_KEY = "dreamspeak.music-player.v1";
   const WRITING_METRICS_KEY = "dreamspeak.writing-metrics.v1";
+  const TOOL_CENTER_KEY = "dreamspeak.tool-center.v1";
   const AUTOSAVE_DELAY = 650;
+  const DEFAULT_PREPARED_QUESTION = "Based only on the sources in this notebook, what canon details are most relevant to the scene I am drafting?";
+  const TOOL_REGISTRY = [
+    { id: "write", label: "Write", type: "internal", target: "editor", note: "your local draft remains the default workspace." },
+    { id: "wiki", label: "Wiki", type: "external", title: "Dreamspeak Wiki", kind: "Private archive launcher", note: "open the separately hosted or locally served Wiki.", description: "Add the private Wiki address used on this device. The manuscript and Wiki data are never bundled into this public app.", actionLabel: "Open Wiki" },
+    { id: "motif", label: "Motifs", type: "external", title: "Motif Report", kind: "Prepared launcher", note: "keep a destination ready for future motif work.", description: "Add a report address when one is available. Phase 5 provides the launcher only; it does not analyze or upload the manuscript.", actionLabel: "Open Motif Report" },
+    { id: "timeline", label: "Timeline", type: "external", title: "Timeline", kind: "Placeholder launcher", note: "reserve a safe path to a future timeline.", description: "Add a timeline address when one is available. Timeline exploration itself remains a future, separately scoped tool.", actionLabel: "Open Timeline" },
+    { id: "images", label: "Images", type: "internal", target: "images", note: "move to the private image library already on this device." },
+    { id: "music", label: "Music", type: "internal", target: "music", note: "move to the local Discography player." },
+    { id: "notebook", label: "Notebook", type: "external", title: "NotebookLM / Gemini Notebook", kind: "External notebook launcher", note: "copy a prepared question or open your notebook safely.", description: "Paste the address of the notebook you want to use. Quiet Draft does not embed, automate, or sign in to Google services.", actionLabel: "Open Notebook", question: true }
+  ];
   const DEFAULT_ATMOSPHERE = {
     background: "none",
     editorAppearance: "dark-glass",
@@ -69,6 +80,22 @@
     metricManuscriptTotal: document.querySelector("#metric-manuscript-total"),
     metricLastAutosave: document.querySelector("#metric-last-autosave"),
     metricLastExport: document.querySelector("#metric-last-export"),
+    currentToolLabel: document.querySelector("#current-tool-label"),
+    toolTabs: document.querySelector("#tool-tabs"),
+    toolNote: document.querySelector("#tool-note"),
+    toolDetail: document.querySelector("#tool-detail"),
+    toolDetailKind: document.querySelector("#tool-detail-kind"),
+    toolDetailTitle: document.querySelector("#tool-detail-title"),
+    toolDetailStatus: document.querySelector("#tool-detail-status"),
+    toolDetailCopy: document.querySelector("#tool-detail-copy"),
+    toolUrl: document.querySelector("#tool-url"),
+    toolQuestionFields: document.querySelector("#tool-question-fields"),
+    toolQuestion: document.querySelector("#tool-question"),
+    toolPrimaryAction: document.querySelector("#tool-primary-action"),
+    toolCopyQuestion: document.querySelector("#tool-copy-question"),
+    editorModule: document.querySelector(".editor-module"),
+    imageCard: document.querySelector(".image-card"),
+    musicCard: document.querySelector(".music-card"),
     toast: document.querySelector("#toast"),
     factCategory: document.querySelector("#fact-category"),
     factSpeaker: document.querySelector("#fact-speaker"),
@@ -161,12 +188,165 @@
   };
   let sessionWordDelta = 0;
   let observedWordCount = 0;
+  let activeToolId = "write";
+  let toolSettings = {
+    urls: { wiki: "", motif: "", timeline: "", notebook: "" },
+    preparedQuestion: DEFAULT_PREPARED_QUESTION
+  };
   const customSoundBuffers = new Map();
   let atmosphere = { ...DEFAULT_ATMOSPHERE };
 
   function numberInRange(value, minimum, maximum, fallback) {
     const number = Number(value);
     return Number.isFinite(number) ? Math.min(maximum, Math.max(minimum, number)) : fallback;
+  }
+
+  function loadToolSettings() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(TOOL_CENTER_KEY));
+      if (saved && typeof saved === "object") {
+        const savedUrls = saved.urls && typeof saved.urls === "object" ? saved.urls : {};
+        for (const id of ["wiki", "motif", "timeline", "notebook"]) {
+          toolSettings.urls[id] = typeof savedUrls[id] === "string" ? savedUrls[id].slice(0, 2000) : "";
+        }
+        toolSettings.preparedQuestion = typeof saved.preparedQuestion === "string"
+          ? saved.preparedQuestion.slice(0, 1000)
+          : DEFAULT_PREPARED_QUESTION;
+      }
+    } catch (error) {
+      console.warn("Dreamspeak found unreadable Tool Center settings.", error);
+    }
+  }
+
+  function saveToolSettings() {
+    try {
+      localStorage.setItem(TOOL_CENTER_KEY, JSON.stringify(toolSettings));
+    } catch (error) {
+      console.warn("Dreamspeak could not save Tool Center settings.", error);
+    }
+  }
+
+  function activeTool() {
+    return TOOL_REGISTRY.find((tool) => tool.id === activeToolId) || TOOL_REGISTRY[0];
+  }
+
+  function safeToolUrl(value) {
+    try {
+      const url = new URL(String(value).trim());
+      return url.protocol === "https:" || url.protocol === "http:" ? url.href : "";
+    } catch (error) {
+      return "";
+    }
+  }
+
+  function renderToolCenter() {
+    const tool = activeTool();
+    elements.currentToolLabel.textContent = tool.label;
+    elements.toolTabs.querySelectorAll(".tool-tab").forEach((button) => {
+      const selected = button.dataset.toolId === tool.id;
+      button.classList.toggle("active", selected);
+      button.setAttribute("aria-pressed", String(selected));
+    });
+    elements.toolNote.replaceChildren();
+    const noteLabel = document.createElement("strong");
+    noteLabel.textContent = `${tool.label}:`;
+    elements.toolNote.append(noteLabel, ` ${tool.note}`);
+
+    const external = tool.type === "external";
+    elements.toolDetail.hidden = !external;
+    if (!external) return;
+
+    const configured = Boolean(safeToolUrl(toolSettings.urls[tool.id]));
+    elements.toolDetailKind.textContent = tool.kind;
+    elements.toolDetailTitle.textContent = tool.title;
+    elements.toolDetailStatus.textContent = configured ? "Ready" : "Local setup";
+    elements.toolDetailCopy.textContent = tool.description;
+    elements.toolUrl.value = toolSettings.urls[tool.id] || "";
+    elements.toolPrimaryAction.textContent = tool.actionLabel;
+    elements.toolQuestionFields.hidden = !tool.question;
+    elements.toolCopyQuestion.hidden = !tool.question;
+    if (tool.question) elements.toolQuestion.value = toolSettings.preparedQuestion;
+  }
+
+  function renderToolTabs() {
+    elements.toolTabs.replaceChildren();
+    for (const tool of TOOL_REGISTRY) {
+      const button = document.createElement("button");
+      button.className = "tool-tab";
+      button.type = "button";
+      button.dataset.toolId = tool.id;
+      button.textContent = tool.label;
+      button.setAttribute("aria-pressed", "false");
+      button.addEventListener("click", () => selectTool(tool.id));
+      elements.toolTabs.append(button);
+    }
+  }
+
+  function selectTool(id) {
+    const tool = TOOL_REGISTRY.find((item) => item.id === id);
+    if (!tool) return;
+    saveDraft();
+    activeToolId = tool.id;
+    renderToolCenter();
+
+    if (tool.target === "editor") {
+      elements.body.focus();
+    } else if (tool.target === "images") {
+      elements.imageCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    } else if (tool.target === "music") {
+      elements.musicCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }
+
+  function initializeToolCenter() {
+    loadToolSettings();
+    activeToolId = "write";
+    renderToolTabs();
+    renderToolCenter();
+  }
+
+  function openActiveTool() {
+    const tool = activeTool();
+    if (tool.type !== "external") return;
+    const url = safeToolUrl(toolSettings.urls[tool.id]);
+    if (!url) {
+      elements.toolUrl.focus();
+      showToast("Enter a complete http or https address first");
+      return;
+    }
+    saveDraft();
+    const link = document.createElement("a");
+    link.href = url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    showToast(`Opening ${tool.label} in a new tab`);
+  }
+
+  async function copyPreparedQuestion() {
+    const text = toolSettings.preparedQuestion.trim();
+    if (!text) {
+      elements.toolQuestion.focus();
+      showToast("Write a prepared question first");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast("Prepared question copied");
+    } catch (error) {
+      const helper = document.createElement("textarea");
+      helper.value = text;
+      helper.setAttribute("readonly", "");
+      helper.style.position = "fixed";
+      helper.style.opacity = "0";
+      document.body.appendChild(helper);
+      helper.select();
+      const copied = document.execCommand("copy");
+      helper.remove();
+      showToast(copied ? "Prepared question copied" : "Select the question and copy manually");
+    }
   }
 
   function loadAtmosphere() {
@@ -1753,6 +1933,19 @@
     writingMetrics.manuscriptTotal = Math.round(numberInRange(elements.metricManuscriptTotal.value, 0, 9999999, 0));
     saveWritingMetrics();
   });
+  elements.toolUrl.addEventListener("input", () => {
+    const tool = activeTool();
+    if (tool.type !== "external") return;
+    toolSettings.urls[tool.id] = elements.toolUrl.value.slice(0, 2000);
+    saveToolSettings();
+    elements.toolDetailStatus.textContent = safeToolUrl(toolSettings.urls[tool.id]) ? "Ready" : "Local setup";
+  });
+  elements.toolQuestion.addEventListener("input", () => {
+    toolSettings.preparedQuestion = elements.toolQuestion.value.slice(0, 1000);
+    saveToolSettings();
+  });
+  elements.toolPrimaryAction.addEventListener("click", openActiveTool);
+  elements.toolCopyQuestion.addEventListener("click", copyPreparedQuestion);
   elements.newDraft.addEventListener("click", newDraft);
   elements.saveDraft.addEventListener("click", () => saveDraft({ announce: true }));
   elements.exportDraft.addEventListener("click", exportDraft);
@@ -1885,13 +2078,14 @@
   loadGallery();
   loadMusicLibrary({ restorePosition: true });
   loadDraft();
+  initializeToolCenter();
   initializeWritingMetrics();
   updateCounts();
   resizeEditor();
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260719-7")
+      navigator.serviceWorker.register("./service-worker.js?v=20260719-8")
         .then((registration) => registration.update())
         .catch((error) => {
           if (!navigator.serviceWorker.controller) {

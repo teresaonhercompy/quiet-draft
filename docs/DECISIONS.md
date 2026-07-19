@@ -196,3 +196,15 @@
 **Alternatives considered:** Add fields to the existing draft record; store every keystroke event; calculate metrics from the manuscript archive; synchronize metrics; retain session count across app launches.
 
 **Consequences:** Existing drafts and assets require no migration. Today’s words are net editor-input changes on this device and reset on the next observed local date. New Draft clearing is excluded. Metrics do not include Scrivener, other devices, or work outside Quiet Draft, and browser-data deletion removes them.
+
+## DCC-018 — Phase 5 launchers store configuration, never manuscript content
+
+**Date:** 2026-07-19
+
+**Decision:** Define Phase 5 tools in a JavaScript registry. Keep Write as the launch default, route Images and Music to their existing local modules, and provide configurable `http`/`https` launchers for Wiki, Motifs, Timeline, and Notebook. Store only launcher addresses and the prepared Notebook question under `dreamspeak.tool-center.v1`.
+
+**Reason:** The Tool Center needs to be extensible without publishing proprietary files or pretending that a hosted PWA can freely read iPad Files. External notebooks and future reports can be reached safely without integrating unsupported services.
+
+**Alternatives considered:** Embed every destination in an iframe; hard-code personal URLs; automate NotebookLM; upload the Wiki into the public shell; persist the last active tool; add a backend.
+
+**Consequences:** Every switch saves the draft, but Write returns on launch. External tools require a complete address configured separately on each device and need connectivity unless the destination has its own offline support. The app never transmits the draft, stores credentials, scrapes NotebookLM, or makes private files public.

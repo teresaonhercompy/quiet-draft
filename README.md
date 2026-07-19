@@ -1,6 +1,6 @@
 # Dreamspeak Command Center — Quiet Draft
 
-Dreamspeak Command Center is a dark, local-first creative shell built around Quiet Draft, its distraction-free scene editor for iPad. Phase 4 adds quiet writing metrics and persistent project context while keeping every writing and supporting-module behavior intact. It runs entirely in the browser, saves the current draft on the device, and works offline after its first successful load.
+Dreamspeak Command Center is a dark, local-first creative shell built around Quiet Draft, its distraction-free scene editor for iPad. Phase 5 adds a private, configurable Tool Center while keeping every writing and supporting-module behavior intact. It runs entirely in the browser, saves the current draft on the device, and works offline after its first successful load.
 
 There is no login, cloud sync, AI, analytics, or external service. Draft text is stored only in the browser's local storage. Export or copy the text when you are ready to move it into Scrivener.
 
@@ -16,7 +16,8 @@ There is no login, cloud sync, AI, analytics, or external service. Draft text is
 - Remembered music selection and playback position without autoplay
 - Current project, draft, and scene/chapter highlights
 - Session words, today’s net words, last autosave, last export, and manual manuscript total
-- Quiet placeholders for future tools and the separate local Wiki
+- Data-driven Tool Center for Write, Wiki, Motifs, Timeline, Images, Music, and Notebook
+- Device-local launcher addresses and an editable prepared Notebook question
 - Full-screen, responsive writing space
 - Automatic local saving while you type
 - Manual **Save Locally** button and `Command-S` shortcut
@@ -129,6 +130,12 @@ MP3, M4A, and WAV are the safest iPad formats. Embedded metadata is currently re
 Edit **Current project**, **Scene / chapter**, and **Manuscript total** directly in the Highlights panel. Those values, today’s net word change, and the last export time use the local-only `dreamspeak.writing-metrics.v1` record. The current draft comes from the existing title field, and the last autosave comes from the existing draft record.
 
 **Session words** begin at zero whenever the app launches or reloads. **Today’s words** records net words added or removed through editor input on the current device and resets when the app observes a new local calendar date. Starting a new draft does not count clearing the previous draft as negative writing. These are drafting aids rather than a manuscript audit; they do not scan Scrivener, imported manuscripts, or writing performed on another device.
+
+## Tool Center
+
+**Write** is selected on every launch. Choosing any tool saves the current draft first. **Images** and **Music** move to the existing device-local modules; **Wiki**, **Motifs**, **Timeline**, and **Notebook** expose a compact launcher where a complete `http://` or `https://` address can be stored for that device.
+
+Launcher settings and the prepared Notebook question use the additive local-only `dreamspeak.tool-center.v1` record. External destinations open with new-tab and opener protections. Quiet Draft does not embed external pages, authenticate to them, send draft text, scrape NotebookLM, or automate a Google browser session. A normal hosted web app cannot launch arbitrary private files from Files, so the Wiki launcher requires an address reachable by Safari; it can remain unconfigured until an approved Wiki architecture is available.
 
 ## Optional local background images
 

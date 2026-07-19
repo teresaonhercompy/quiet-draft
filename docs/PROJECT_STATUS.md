@@ -2,13 +2,13 @@
 
 **Updated:** 2026-07-19
 
-**Current phase:** Phase 4 — Writing Metrics and Highlights
+**Current phase:** Phase 5 — Tool Center
 
 **Phase state:** Local implementation complete; ready for publication and physical-iPad acceptance
 
-**Current production version:** Dreamspeak Command Center Phase 3 / service-worker cache `20260719-6`
+**Current production version:** Dreamspeak Command Center Phase 4 / service-worker cache `20260719-7`
 
-**Phase 4 candidate:** service-worker cache `20260719-7`
+**Phase 5 candidate:** service-worker cache `20260719-8`
 
 **Production:** <https://teresaonhercompy.github.io/quiet-draft/>
 
@@ -61,11 +61,23 @@
 - Added the additive local-only `dreamspeak.writing-metrics.v1` record without changing existing draft or IndexedDB storage.
 - Added local-calendar rollover, net word-change accounting, and New Draft baseline protection.
 - Documented single-device, current-editor, and browser-storage limitations.
+- Merged pull request #9, deployed cache `20260719-7`, and received complete physical-iPad acceptance.
+
+### Phase 5 — Tool Center
+
+- Replaced disabled placeholders with a seven-tool, data-driven registry.
+- Kept Write as the launch default and added clear active-tool state.
+- Routed Images and Music to their existing private local modules.
+- Added device-local configurable launchers for Wiki, Motifs, Timeline, and Notebook.
+- Added an editable prepared Notebook question with explicit clipboard copy.
+- Forced a local draft save before every tool switch and external launch.
+- Limited external launchers to validated `http` and `https` addresses opened with new-tab and opener protections.
+- Added the additive `dreamspeak.tool-center.v1` record without changing any draft, metric, atmosphere, content, gallery, or music storage.
 
 ## In-progress work
 
-- Publication of the Phase 4 candidate branch.
-- Physical-iPad acceptance of metrics, persistence, export timing, local-date behavior, layout, and offline use.
+- Publication of the Phase 5 candidate branch.
+- Physical-iPad acceptance of tool switching, local launcher configuration, prepared-question copy, layout, and offline use.
 
 ## Known observations
 
@@ -78,11 +90,11 @@
 
 ## Next approved task
 
-No Phase 5 implementation is approved. The next task is Phase 4 deployment and physical-iPad acceptance only.
+No Phase 6 implementation is approved. The next task is Phase 5 deployment and physical-iPad acceptance only.
 
 ## Last tested candidate
 
-- **Local candidate:** service-worker cache `20260719-7`
+- **Local candidate:** service-worker cache `20260719-8`
 - **Syntax/data validation:** passed for JavaScript and JSON
 - **Privacy:** no tracked audio; no audio in the service-worker app shell; test fixture hook removed before commit
 - **Empty library:** silent, stable, and all unavailable transport controls disabled
@@ -102,8 +114,16 @@ No Phase 5 implementation is approved. The next task is Phase 4 deployment and p
 - **Local date:** date keys use local year/month/day and are checked whenever the app loads, returns to the foreground, or records typing
 - **Phase 4 layouts:** 1180×820 has no page or Highlights overflow; 820×1180 keeps the editor first and makes Highlights horizontally scrollable
 - **Phase 4 offline:** draft and every persisted highlight restored with the local server stopped
-- **Current production `main`:** `c159632`; Phase 3
-- **Phase 4 branch:** `feature/phase-4-writing-metrics`
+- **Phase 5 registry:** seven tools rendered; Write active by default after every reload
+- **Draft preservation:** the exact test draft was saved before switching and survived launcher navigation, reload, and offline relaunch
+- **Launcher configuration:** Wiki address changed to Ready, opened through a protected external-link action, and persisted across reload
+- **Prepared question:** edited text copied exactly to the clipboard and persisted across offline relaunch
+- **Internal tools:** Images remained aligned at the top of the landscape media rail; Music scrolled that rail to its complete card while preserving the active state
+- **Phase 5 landscape:** 1180×820, no horizontal/page overflow; all seven tabs fit; expanded Notebook panel leaves a 316px editor and Focus Mode restores 820px
+- **Phase 5 portrait:** 820×1180, no horizontal overflow; editor remains ahead of supporting modules and normal page scrolling reaches them
+- **Phase 5 offline:** seven tools, exact draft, and prepared question restored with the local server stopped; no app warnings or errors
+- **Current production `main`:** `4b1de0d`; Phase 4
+- **Phase 5 branch:** `feature/phase-5-tool-center`
 
 ## Phase 2 iPad acceptance
 
@@ -134,14 +154,30 @@ No Phase 5 implementation is approved. The next task is Phase 4 deployment and p
 
 ## Phase 4 iPad acceptance checklist
 
-- [ ] Existing draft and all Phase 2/3 local imports remain intact.
-- [ ] Project, scene/chapter, and manual manuscript total can be edited and persist.
-- [ ] Draft highlight follows the Quiet Draft title.
-- [ ] Session words update with net additions/removals and reset after relaunch.
-- [ ] Today’s words update with net additions/removals and persist after relaunch.
-- [ ] Last autosave changes after autosave or **Save Locally**.
-- [ ] Last export changes after **Export .txt**.
-- [ ] Landscape Highlights remain quiet and every side module still scrolls.
-- [ ] Portrait keeps the editor first and allows horizontal Highlights scrolling.
-- [ ] Focus Mode, music, backgrounds, sounds, and export remain functional.
-- [ ] Airplane Mode restores the draft and persisted Highlights.
+- [x] Existing draft and all Phase 2/3 local imports remain intact.
+- [x] Project, scene/chapter, and manual manuscript total can be edited and persist.
+- [x] Draft highlight follows the Quiet Draft title.
+- [x] Session words update with net additions/removals and reset after relaunch.
+- [x] Today’s words update with net additions/removals and persist after relaunch.
+- [x] Last autosave changes after autosave or **Save Locally**.
+- [x] Last export changes after **Export .txt**.
+- [x] Landscape Highlights remain quiet and every side module still scrolls.
+- [x] Portrait keeps the editor first and allows horizontal Highlights scrolling.
+- [x] Focus Mode, music, backgrounds, sounds, and export remain functional.
+- [x] Airplane Mode restores the draft and persisted Highlights.
+
+**Acceptance recorded:** 2026-07-19. The user reported that Phase 4 worked perfectly across the complete iPad test sequence.
+
+## Phase 5 iPad acceptance checklist
+
+- [ ] Existing draft, metrics, atmosphere, private images/content, and music remain intact.
+- [ ] Write is active whenever the app launches or reloads.
+- [ ] Switching to every tool preserves and locally saves the current draft.
+- [ ] Images and Music move to their existing modules.
+- [ ] Wiki, Motifs, Timeline, and Notebook each show the correct launcher.
+- [ ] A valid `http` or `https` address changes the launcher to **Ready** and persists.
+- [ ] Open actions launch separately without replacing or losing the draft on iPad.
+- [ ] Notebook prepared-question editing and **Copy Question** work and persist.
+- [ ] Landscape and portrait remain usable with launcher details expanded.
+- [ ] Focus Mode hides the Tool Center and retains the full-screen editor.
+- [ ] Airplane Mode restores the Tool Center, draft, and stored launcher configuration.
