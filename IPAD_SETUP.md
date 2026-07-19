@@ -1,6 +1,6 @@
 # Dreamspeak Command Center: iPad Setup and Local Atmosphere Guide
 
-This guide covers installing Dreamspeak Command Center with its Quiet Draft editor on an iPad, preparing background images and typing sounds in the Files app, importing those assets privately onto the iPad, and using the app offline.
+This guide covers installing Dreamspeak Command Center with its Quiet Draft editor on an iPad, preparing private content, background images, gallery images, and typing sounds in the Files app, importing those assets privately onto the iPad, and using the app offline.
 
 Quiet Draft is hosted at:
 
@@ -12,12 +12,12 @@ Quiet Draft supports two different kinds of atmosphere assets:
 
 | Method | Where the asset is stored | Private? | Available offline? | Best use |
 | --- | --- | --- | --- | --- |
-| **Add background images** or **Add your own sounds** inside Quiet Draft | In the installed web app’s private browser database on that iPad | Yes | Yes | Personal images and sounds |
+| **Import Library**, **Add Local Images**, **Add background images**, or **Add your own sounds** inside the app | In the installed web app’s private browser database on that iPad | Yes | Yes | Facts, messages, personal images, and sounds |
 | Images committed to the repository’s `backgrounds` folder | On GitHub Pages with the public app | No | Yes, after the image has been loaded | Backgrounds that should appear on every device |
 
 Custom typing sounds are intentionally supported only through the private, on-device import workflow. Quiet Draft does not upload them to GitHub.
 
-Drafts, local backgrounds, local sounds, and atmosphere settings are not synchronized between devices. Keep the original image and audio files in the Files app as a backup.
+Drafts, imported facts, gallery images, local backgrounds, local sounds, and atmosphere settings are not synchronized between devices. Keep every original file in the Files app as a backup.
 
 ## Before you begin
 
@@ -38,11 +38,14 @@ This step is optional, but it makes backups and future reinstallation much easie
 2. Tap **Browse** in the sidebar.
 3. Under **Locations**, choose **On My iPad**.
 4. Create a folder named `Quiet Draft Assets`.
-5. Inside it, create two folders:
+5. Inside it, create three folders:
    - `Backgrounds`
+   - `Gallery Images`
    - `Typing Sounds`
-6. Copy or move your image files into `Backgrounds`.
-7. Copy or move your audio files into `Typing Sounds`.
+6. Copy or move your wallpaper files into `Backgrounds`.
+7. Copy or move private character and project art into `Gallery Images`.
+8. Copy or move your audio files into `Typing Sounds`.
+9. Keep `Dreamspeak_Phase2_Content.json` at the top level of `Quiet Draft Assets`.
 
 Files stored under **On My iPad** stay on the device. If you prefer to keep backup copies in iCloud, create the same folder under **iCloud Drive** instead. Selecting an iCloud Drive file in Quiet Draft imports a private copy into the app, but the original remains in iCloud Drive.
 
@@ -101,7 +104,29 @@ Before importing atmosphere assets, verify that the app’s local storage is wor
 
 Quiet Draft Version 1 stores one current draft. Use **Export .txt** regularly for writing you cannot afford to lose.
 
-## 4. Import private background images
+## 4. Import the private character library
+
+1. Copy `Dreamspeak_Phase2_Content.json` from the Mac's `Dreamspeak_Codex/private-import` folder into the iPad Files app.
+2. Open Dreamspeak from the Home Screen.
+3. Find either the **Tabi & Norielle** card or the **Mabel** card beneath the editor in portrait orientation.
+4. Tap **Import Library**.
+5. Choose `Dreamspeak_Phase2_Content.json` from Files.
+6. Wait for the confirmation showing the number of imported facts and messages.
+7. Test **Next Fact** and **Next Message**.
+
+The manuscript-derived library is never part of GitHub Pages. The selected JSON is read directly from Files and stored only in the installed app's browser database. Keep the JSON file as a backup.
+
+## 5. Import private gallery images
+
+1. Open the **Image Preview** card.
+2. Tap **Add Local Images**.
+3. Choose one or more files from `Quiet Draft Assets → Gallery Images`.
+4. Wait for the import confirmation.
+5. Use the previous, random, and next controls to browse the gallery.
+
+Local gallery images stay on the current device. The filename becomes the initial title; captions are optional and the app works without them.
+
+## 6. Import private background images
 
 Import personal backgrounds from inside the installed Home Screen app so they are associated with that installation.
 
@@ -134,7 +159,7 @@ The selected files are copied into Quiet Draft’s private IndexedDB storage. Th
 
 This removes only Quiet Draft’s imported copy. It does not delete the original from the Files app.
 
-## 5. Import private typing sounds
+## 7. Import private typing sounds
 
 Typing sounds remain off until you explicitly enable them.
 
@@ -171,7 +196,7 @@ The final file in a multi-file import becomes the initially selected sound, but 
 
 The built-in **Soft Click**, **Typewriter**, and **Mechanical** styles are generated by the app and cannot be removed.
 
-## 6. Test offline use
+## 8. Test offline use
 
 1. While still online, launch Quiet Draft from the Home Screen.
 2. Select every repository-hosted background you expect to use offline at least once. This lets the service worker cache the image.
@@ -181,13 +206,15 @@ The built-in **Soft Click**, **Typewriter**, and **Mechanical** styles are gener
 6. Confirm that:
    - The editor opens.
    - Your current draft appears.
+   - **Next Fact** and **Next Message** work after importing the private library.
+   - Included and locally imported gallery images appear.
    - A private background can be selected.
    - A private typing sound plays.
 7. Turn Airplane Mode off after the test.
 
 Locally imported backgrounds and sounds are already on the iPad and do not need a network connection. Repository-hosted backgrounds should be selected once online before relying on them during travel.
 
-## 7. Add a public background to every installation
+## 9. Add a public background to every installation
 
 Use this method only for images you are comfortable making public. Any image committed to the public GitHub repository can be viewed or downloaded by other people.
 
@@ -209,7 +236,7 @@ The deployment automatically rebuilds `backgrounds/backgrounds.json`, so image f
 
 Do not commit personal typing sounds to this repository. The project’s `.gitignore` intentionally excludes common audio formats, and Quiet Draft’s private sound importer is the supported Version 1 workflow.
 
-## 8. Backups, updates, and data safety
+## 10. Backups, updates, and data safety
 
 ### Back up writing
 

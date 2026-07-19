@@ -112,3 +112,27 @@
 **Alternatives considered:** Publish a second PWA at another path; rename all browser-storage identifiers; keep the installed name Quiet Draft indefinitely.
 
 **Consequences:** The installed product presents the Command Center identity without copying or migrating user content. Quiet Draft remains the named editor module inside the shell.
+
+## DCC-011 — Phase 2 proprietary content uses explicit device-local import
+
+**Date:** 2026-07-19
+
+**Decision:** The public application contains the Phase 2 module code, an empty public fact file, and generic authored Mabel messages. Manuscript-derived facts and private gallery images are imported explicitly on each device and stored in new object stores inside the existing `quiet-draft-assets` IndexedDB database.
+
+**Reason:** A static JSON fact library derived from the manuscript would be publicly downloadable if deployed through GitHub Pages. Explicit import preserves the approved public-shell/private-content boundary and still supports offline use.
+
+**Alternatives considered:** Commit manuscript-derived facts; omit facts until private hosting exists; create a backend; place private files beside the public app and rely on an unlisted URL.
+
+**Consequences:** Facts and personal images do not synchronize automatically. The user must keep the source JSON and image files as backups and import them on both Mac and iPad. The existing `sounds` and `backgrounds` stores remain unchanged; Phase 2 adds `command-center-content` and `gallery` while upgrading the database from version 2 to version 3.
+
+## DCC-012 — Reuse the four approved public scenes as the bundled Phase 2 gallery
+
+**Date:** 2026-07-19
+
+**Decision:** The initial bundled gallery references the four public background images already approved in DCC-006. Additional character and project images remain device-local.
+
+**Reason:** Phase 2 requires an included offline image preview, but no private artwork may be deployed. Reusing approved files satisfies offline and missing-asset testing without widening the public asset set.
+
+**Alternatives considered:** Ship no bundled gallery; publish private character art; add newly generated public artwork; use remote image URLs.
+
+**Consequences:** The gallery works immediately and offline after installation. It begins with atmospheric scenes rather than character art, and private images appear only after local import.

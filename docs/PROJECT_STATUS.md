@@ -1,85 +1,97 @@
 # Dreamspeak Command Center — Project Status
 
 **Updated:** 2026-07-19  
-**Current phase:** Phase 1 — Dark Command-Center Shell
+**Current phase:** Phase 2 — Character, Encouragement, and Image Modules
 
-**Phase state:** Implementation complete; ready for user acceptance on iPad
+**Phase state:** Implementation complete; ready for review and physical-iPad acceptance
 
-**Current app version:** Dreamspeak Command Center Phase 1 / service-worker cache `20260719-1`
-**Production:** <https://teresaonhercompy.github.io/quiet-draft/>  
-**Repository:** <https://github.com/teresaonhercompy/quiet-draft>  
+**Current production version:** Dreamspeak Command Center Phase 1 / service-worker cache `20260719-1`
+
+**Phase 2 candidate:** service-worker cache `20260719-2`
+
+**Production:** <https://teresaonhercompy.github.io/quiet-draft/>
+
+**Repository:** <https://github.com/teresaonhercompy/quiet-draft>
+
 **Recovery tag:** `quiet-draft-v1-baseline-2026-07-19`
 
 ## Completed work
 
 ### Phase 0 — Audit and safeguard
 
-- Audited the Quiet Draft files, architecture, Git history, deployment workflow, and browser storage.
-- Confirmed that the Dreamspeak manuscript, Wiki database, Wiki source, character art, and personal audio are outside the public Quiet Draft repository.
-- Confirmed that personal audio formats are ignored by Git and that GitHub Pages deploys from a fresh tracked checkout.
-- Confirmed that the only large media in the repository are the four user-approved public fallback backgrounds.
-- Verified that a discarded local-only commit containing one WAV file was never received by GitHub. It is not reachable from a branch or tag and cannot be deployed.
-- Validated the original editor, export path, atmosphere settings, reload recovery, and offline behavior.
-- Published the known-good recovery tag and merged the accepted Phase 0 documentation through pull request #2.
-- Received user acceptance after successful physical-iPad testing, including Airplane Mode.
+- Audited the Quiet Draft architecture, Git history, deployment workflow, browser storage, and private/public asset boundary.
+- Confirmed that the manuscript, Wiki, character art, and personal audio remain outside the public repository.
+- Published the known-good recovery tag and received physical-iPad acceptance, including Airplane Mode.
 
 ### Phase 1 — Dark Command-Center shell
 
-- Added a dark-by-default design system with reusable color tokens while preserving the saved light/dark preference.
-- Added a compact header, quiet highlights strip, and responsive three-column desktop/iPad-landscape shell.
-- Embedded the existing Quiet Draft editor as the widest, primary center workspace.
-- Added visibly disabled placeholders for character facts, Mabel encouragement, image preview, discography, tool switching, and the separate local Wiki.
-- Added a local/offline status indicator without introducing a new storage key or network service.
-- Updated the installable PWA identity to Dreamspeak Command Center and bumped the app-shell cache to `20260719-1`.
-- Preserved every production localStorage key, IndexedDB database/store name, and draft/export behavior.
-- Validated autosave, reload recovery, counts, manual save, copy, export, backgrounds, typing-sound preferences, theme persistence, focus mode, and offline launch.
-- Validated responsive layouts at desktop 1440×900, iPad landscape 1180×820, and iPad portrait 820×1180 with no horizontal overflow.
-- Confirmed no Quiet Draft-specific console warnings or errors during the tested flows.
+- Added the dark responsive Command Center, compact header, highlights strip, three-column landscape layout, and editor-first portrait layout.
+- Embedded Quiet Draft without changing its localStorage keys, IndexedDB database/store names, exports, atmosphere controls, focus mode, or offline behavior.
+- Added placeholders for future supporting modules and updated the installable PWA identity.
+- Merged pull request #3 and deployed cache `20260719-1` through GitHub Pages.
+- Received physical-iPad acceptance for all nine test steps, including Airplane Mode.
+
+### Phase 2 — Supporting modules
+
+- Replaced the Tabi/Norielle placeholder with a data-driven fact card supporting speaker, category, non-canon labeling, random launch content, and **Next Fact**.
+- Added private JSON library import. Manuscript-derived facts are stored in the existing browser database under a new store and are never bundled or deployed.
+- Replaced the Mabel placeholder with a data-driven authored library, random launch content, and **Next Message**.
+- Replaced the image placeholder with a working gallery supporting random launch, previous, random, and next navigation, titles, captions, and missing-image fallback.
+- Added local gallery-image import into a separate IndexedDB store.
+- Added the four user-approved public background scenes as the bundled offline gallery.
+- Prepared `Dreamspeak_Codex/private-import/Dreamspeak_Phase2_Content.json` outside the public repository for private iPad/Mac import.
+- Bumped the service-worker cache to `20260719-2` and explicitly cached the Phase 2 data files and four included gallery images.
+- Preserved all production draft, atmosphere, background, and typing-sound storage identifiers.
 
 ## In-progress work
 
-- User acceptance testing of the Phase 1 shell on the physical iPad in landscape, portrait, focus mode, and Airplane Mode.
-- Review and merge of the Phase 1 pull request.
+- Review and publication of the Phase 2 candidate branch.
+- Physical-iPad acceptance of private library import, local gallery import, navigation, persistence, and Airplane Mode.
 
 ## Known observations
 
-- No Phase 1 application bugs were found in local desktop or simulated iPad-size testing.
-- The four included backgrounds appear twice in the Scene menu: once as named built-ins and once as files discovered from `backgrounds/backgrounds.json`. This is cosmetic and does not block drafting or offline use. De-duplication is deferred unless explicitly approved.
-- Browser data is tied to the exact site address. Moving from GitHub Pages to another domain would create a separate, empty storage area unless a migration/export plan is completed first.
-- Version 1 stores one current draft. Export remains the permanent backup path.
-- Locally imported images and sounds are not synchronized between the Mac and iPad; each device receives its own private imported copy.
+- The public `data/facts.json` is deliberately empty. Canon facts remain private and become available after importing the separate device-local JSON library.
+- Reimporting a fact/message library replaces the previous private library of the same type. The bundled generic Mabel messages remain available.
+- Locally imported gallery images currently use their filename as the title and do not have an in-app caption editor. Caption editing is not required by Phase 2.
+- The four included backgrounds still appear both as named backgrounds and as files discovered from `backgrounds/backgrounds.json`. This cosmetic duplication is unchanged from Phase 1.
+- Clearing Safari website data or deleting the installed PWA may remove drafts and imported assets. Original JSON, image, audio, and exported draft files remain the required backup.
 
 ## Next approved task
 
-No Phase 2 implementation is approved. After Phase 1 user acceptance and merge, the next proposed task is Phase 2: add data-driven character facts, Mabel encouragement, and the bundled image-preview module.
+No Phase 3 implementation is approved. The next task is Phase 2 review, deployment, and physical-iPad acceptance only.
 
-## Last tested deployment
+## Last tested candidate
 
-- **Live URL checked:** 2026-07-19
-- **HTTP result:** `200 OK`
-- **HTTPS:** enforced
-- **GitHub Pages mode:** GitHub Actions workflow
-- **Current production service worker:** `20260718-5` until Phase 1 is reviewed and merged
-- **Phase 1 candidate service worker:** `20260719-1`, verified on an isolated local origin
-- **Current production `main`:** `32e3708`; Phase 0 documentation merged with no runtime change
-- **Phase 1 branch:** `agent/phase-1-command-center-shell`
+- **Local candidate:** service-worker cache `20260719-2`
+- **Syntax/data validation:** passed for JavaScript and all JSON files
+- **iPad landscape:** 1180×820, three columns, no horizontal overflow
+- **iPad portrait:** 820×1180, editor first, supporting modules visible, no horizontal overflow
+- **Editor regression:** title/body autosave and reload recovery passed; 15-word test draft restored exactly
+- **Module behavior:** Mabel next-message and bundled gallery navigation passed
+- **Offline relaunch:** editor, saved draft, Mabel library, gallery metadata, and included gallery image passed with the local server stopped
+- **Console:** no app-specific warnings or errors
+- **Current production `main`:** `f103c1a`; Phase 1 shell
+- **Phase 2 branch:** `agent/phase-2-supporting-modules`
 
-## Phase 0 iPad acceptance
+## Phase 1 iPad acceptance
 
-- [x] Existing draft, autosave, export, copy, backgrounds, typing sounds, focus mode, and Magic Keyboard behavior passed.
-- [x] Installed PWA launched with the current draft intact in Airplane Mode.
+- [x] Existing real draft appeared in the new Command Center shell.
+- [x] Landscape and portrait layouts worked without horizontal scrolling.
+- [x] Header and draft controls remained comfortable with the Magic Keyboard.
+- [x] Autosave survived closing and reopening the installed PWA.
+- [x] Export, backgrounds, custom typing sounds, focus mode, and theme persistence passed.
+- [x] Airplane Mode launched the new shell with the current draft intact.
 
-**Acceptance recorded:** 2026-07-19. The user reported that Quiet Draft worked exactly as required on the iPad, including in Airplane Mode.
+**Acceptance recorded:** 2026-07-19. The user reported that all nine Phase 1 test steps worked and the app looked beautiful.
 
-## Phase 1 iPad acceptance checklist
+## Phase 2 iPad acceptance checklist
 
-- [ ] Existing real draft appears in the new Command Center shell.
-- [ ] Landscape shows the left rail, wide center editor, and right rail without horizontal scrolling.
-- [ ] Portrait places the editor before the stacked supporting placeholders.
-- [ ] Header and draft controls remain comfortable with the Magic Keyboard attached.
-- [ ] Autosave survives closing and reopening the installed PWA.
-- [ ] **Export .txt** creates a file that opens with the complete title and body.
-- [ ] Background and custom typing-sound preferences remain available.
-- [ ] Focus mode hides the Command Center shell and exits cleanly.
-- [ ] Dark/light preference survives relaunch.
-- [ ] Airplane Mode launches the new shell with the current draft intact.
+- [ ] Existing real draft remains intact after the update.
+- [ ] The private JSON library imports from Files without uploading it.
+- [ ] **Next Fact** rotates Tabi/Norielle content and shows speaker/category labels.
+- [ ] **Next Message** rotates Mabel encouragement.
+- [ ] The bundled gallery loads and previous/random/next controls work.
+- [ ] Private gallery images import from Files and survive relaunch.
+- [ ] Portrait keeps the editor ahead of the supporting cards.
+- [ ] Focus mode, export, backgrounds, and typing sounds remain unchanged.
+- [ ] Airplane Mode launches with the draft, imported facts/messages, and gallery images intact.

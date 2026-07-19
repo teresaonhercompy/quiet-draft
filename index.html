@@ -8,9 +8,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Dreamspeak">
-    <link rel="manifest" href="manifest.webmanifest?v=20260719-1">
-    <link rel="icon" href="icon.svg?v=20260719-1" type="image/svg+xml">
-    <link rel="stylesheet" href="styles.css?v=20260719-1">
+    <link rel="manifest" href="manifest.webmanifest?v=20260719-2">
+    <link rel="icon" href="icon.svg?v=20260719-2" type="image/svg+xml">
+    <link rel="stylesheet" href="styles.css?v=20260719-2">
     <title>Dreamspeak Command Center</title>
   </head>
   <body>
@@ -70,40 +70,51 @@
           </div>
           <div class="highlight-item">
             <span>Build</span>
-            <strong>Phase 1 · Shell</strong>
+            <strong>Phase 2 · Studio</strong>
           </div>
         </div>
       </section>
 
       <main class="command-grid">
         <aside class="rail left-rail" aria-label="Character modules">
-          <section class="module-card placeholder-card" aria-labelledby="fact-card-title">
+          <section class="module-card content-card fact-card" aria-labelledby="fact-card-title">
             <div class="module-heading">
               <div>
                 <span class="eyebrow">Character signal</span>
                 <h2 id="fact-card-title">Tabi &amp; Norielle</h2>
               </div>
-              <span class="placeholder-badge">Phase 2</span>
+              <span class="content-badge" id="fact-category">Local library</span>
             </div>
             <div class="character-orbit" aria-hidden="true">
-              <span>T</span>
-              <span>N</span>
+              <span id="fact-avatar-tabi">T</span>
+              <span id="fact-avatar-norielle">N</span>
             </div>
-            <p class="placeholder-copy">Their authored fact library will live here without interrupting the page.</p>
-            <button class="module-button" type="button" disabled>Facts coming later</button>
+            <p class="speaker-label" id="fact-speaker">Private facts</p>
+            <p class="module-copy" id="fact-text" aria-live="polite">Import your private character library to this device.</p>
+            <span class="non-canon-label" id="fact-non-canon" hidden>Non-canon</span>
+            <div class="module-actions">
+              <button class="module-button" id="next-fact" type="button">Next Fact</button>
+              <button class="module-button secondary" id="import-facts" type="button">Import Library</button>
+            </div>
           </section>
 
-          <section class="module-card placeholder-card" aria-labelledby="mabel-card-title">
+          <section class="module-card content-card mabel-card" aria-labelledby="mabel-card-title">
             <div class="module-heading">
               <div>
                 <span class="eyebrow">A quiet word</span>
                 <h2 id="mabel-card-title">Mabel</h2>
               </div>
-              <span class="placeholder-badge">Phase 2</span>
+              <span class="content-badge">Authored</span>
             </div>
-            <blockquote class="placeholder-quote">“The encouragement can wait. The sentence cannot.”</blockquote>
-            <p class="placeholder-copy">An authored, local message library will replace this placeholder.</p>
+            <div class="mabel-avatar" aria-hidden="true">M</div>
+            <blockquote class="module-quote" id="mabel-message" aria-live="polite">“The encouragement can wait. The sentence cannot.”</blockquote>
+            <div class="module-actions">
+              <button class="module-button" id="next-message" type="button">Next Message</button>
+              <button class="module-button secondary" id="import-messages" type="button">Import Library</button>
+            </div>
           </section>
+
+          <input id="content-library-upload" class="visually-hidden" type="file" accept="application/json,.json">
         </aside>
 
         <section class="center-workspace" aria-label="Main writing workspace">
@@ -176,20 +187,31 @@
         </section>
 
         <aside class="rail right-rail" aria-label="Media modules">
-          <section class="module-card placeholder-card image-card" aria-labelledby="image-card-title">
+          <section class="module-card content-card image-card" aria-labelledby="image-card-title">
             <div class="module-heading">
               <div>
                 <span class="eyebrow">Visual archive</span>
                 <h2 id="image-card-title">Image Preview</h2>
               </div>
-              <span class="placeholder-badge">Phase 2</span>
+              <span class="content-badge" id="gallery-position">0 / 0</span>
             </div>
-            <div class="image-placeholder" role="img" aria-label="Empty local image gallery placeholder">
-              <span class="image-moon" aria-hidden="true"></span>
-              <span class="image-horizon" aria-hidden="true"></span>
-              <span>Local gallery placeholder</span>
+            <figure class="gallery-preview">
+              <div class="gallery-frame">
+                <img id="gallery-image" alt="" hidden>
+                <div class="gallery-empty" id="gallery-empty" role="status">No image available</div>
+              </div>
+              <figcaption>
+                <strong id="gallery-title">Private gallery</strong>
+                <span id="gallery-caption">Add images on this device or browse the included scenes.</span>
+              </figcaption>
+            </figure>
+            <div class="gallery-controls" aria-label="Image navigation">
+              <button class="gallery-button" id="previous-image" type="button" aria-label="Previous image">‹</button>
+              <button class="gallery-button random" id="random-image" type="button">Random</button>
+              <button class="gallery-button" id="next-image" type="button" aria-label="Next image">›</button>
             </div>
-            <p class="placeholder-copy">Private character and project art will be imported on each device.</p>
+            <label class="module-button gallery-upload-button" for="gallery-upload">Add Local Images</label>
+            <input id="gallery-upload" class="visually-hidden" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.avif" multiple>
           </section>
 
           <section class="module-card placeholder-card music-card" aria-labelledby="music-card-title">
@@ -311,6 +333,6 @@
       <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
     </div>
 
-    <script src="app.js?v=20260719-1" defer></script>
+    <script src="app.js?v=20260719-2" defer></script>
   </body>
 </html>
