@@ -184,3 +184,15 @@
 **Alternatives considered:** Continue requiring manual metadata; add an external tag-reading library; upload files to a metadata service; allow operating-system background playback.
 
 **Consequences:** ID3-tagged MP3 imports need less manual setup and sort by track number. M4A and other tag formats still use fallbacks. Existing imported tracks are unchanged until removed and imported again. Leaving the app pauses music, while entering Focus Mode inside the app does not.
+
+## DCC-017 — Phase 4 metrics use one additive local-only record
+
+**Date:** 2026-07-19
+
+**Decision:** Store editable project context, manual manuscript total, the local calendar date, today’s net word delta, and last export timestamp under `dreamspeak.writing-metrics.v1`. Keep the current draft and last autosave authoritative in the existing `quiet-draft.current.v1` record. Session words remain in memory and reset on launch or reload.
+
+**Reason:** Phase 4 needs useful highlights without modifying production draft storage or implying that a single-device browser metric is a complete manuscript history.
+
+**Alternatives considered:** Add fields to the existing draft record; store every keystroke event; calculate metrics from the manuscript archive; synchronize metrics; retain session count across app launches.
+
+**Consequences:** Existing drafts and assets require no migration. Today’s words are net editor-input changes on this device and reset on the next observed local date. New Draft clearing is excluded. Metrics do not include Scrivener, other devices, or work outside Quiet Draft, and browser-data deletion removes them.

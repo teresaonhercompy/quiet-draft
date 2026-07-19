@@ -2,13 +2,13 @@
 
 **Updated:** 2026-07-19
 
-**Current phase:** Phase 3 — Discography Player
+**Current phase:** Phase 4 — Writing Metrics and Highlights
 
-**Phase state:** Implementation complete; ready for review and physical-iPad acceptance
+**Phase state:** Local implementation complete; ready for publication and physical-iPad acceptance
 
-**Current production version:** Dreamspeak Command Center Phase 2 / service-worker cache `20260719-2`
+**Current production version:** Dreamspeak Command Center Phase 3 / service-worker cache `20260719-6`
 
-**Phase 3 candidate:** service-worker cache `20260719-3`
+**Phase 4 candidate:** service-worker cache `20260719-7`
 
 **Production:** <https://teresaonhercompy.github.io/quiet-draft/>
 
@@ -52,11 +52,20 @@
 - Deployed the Phase 3 shell and two iPad landscape scrolling fixes through cache `20260719-5`.
 - Added local ID3v2 MP3 parsing for title, artist, album, track number, and embedded artwork.
 - Added foreground-only playback so closing or backgrounding the app pauses audio while preserving position.
+- Received physical-iPad acceptance for music import, embedded MP3 metadata/artwork, playback, offline use, foreground pausing, and the complete supporting-module regression checks.
+
+### Phase 4 — Writing metrics and highlights
+
+- Replaced the placeholder highlights with editable current project and scene/chapter context.
+- Added current draft, session words, today’s net words, last autosave, last export, and manual manuscript total.
+- Added the additive local-only `dreamspeak.writing-metrics.v1` record without changing existing draft or IndexedDB storage.
+- Added local-calendar rollover, net word-change accounting, and New Draft baseline protection.
+- Documented single-device, current-editor, and browser-storage limitations.
 
 ## In-progress work
 
-- Review and publication of the Phase 3 candidate branch.
-- Physical-iPad acceptance using representative private music and cover art.
+- Publication of the Phase 4 candidate branch.
+- Physical-iPad acceptance of metrics, persistence, export timing, local-date behavior, layout, and offline use.
 
 ## Known observations
 
@@ -69,11 +78,11 @@
 
 ## Next approved task
 
-No Phase 4 implementation is approved. The next task is Phase 3 review, deployment, and physical-iPad acceptance only.
+No Phase 5 implementation is approved. The next task is Phase 4 deployment and physical-iPad acceptance only.
 
 ## Last tested candidate
 
-- **Local candidate:** service-worker cache `20260719-6`
+- **Local candidate:** service-worker cache `20260719-7`
 - **Syntax/data validation:** passed for JavaScript and JSON
 - **Privacy:** no tracked audio; no audio in the service-worker app shell; test fixture hook removed before commit
 - **Empty library:** silent, stable, and all unavailable transport controls disabled
@@ -88,8 +97,13 @@ No Phase 4 implementation is approved. The next task is Phase 3 review, deployme
 - **iPad portrait:** 820×1180, editor first, music controls visible, no horizontal overflow
 - **Offline relaunch:** draft, selected local track, local track count, gallery, and Phase 3 shell restored with the server stopped
 - **Console:** no app-specific warnings or errors
-- **Current production `main`:** `900f482`; Phase 2
-- **Phase 3 branch:** `agent/phase-3-discography-player`
+- **Phase 4 metrics:** +6 words updated session/today; deleting three showed a net −3 session change; restoring them returned the session to zero
+- **Metric persistence:** project, scene, manual total, today’s words, autosave, and export timestamps survived reload; session reset to zero
+- **Local date:** date keys use local year/month/day and are checked whenever the app loads, returns to the foreground, or records typing
+- **Phase 4 layouts:** 1180×820 has no page or Highlights overflow; 820×1180 keeps the editor first and makes Highlights horizontally scrollable
+- **Phase 4 offline:** draft and every persisted highlight restored with the local server stopped
+- **Current production `main`:** `c159632`; Phase 3
+- **Phase 4 branch:** `feature/phase-4-writing-metrics`
 
 ## Phase 2 iPad acceptance
 
@@ -104,14 +118,30 @@ No Phase 4 implementation is approved. The next task is Phase 3 review, deployme
 
 ## Phase 3 iPad acceptance checklist
 
-- [ ] Existing draft and all Phase 2 private imports remain intact after the update.
-- [ ] Tracks import from Files into the chosen artist and album.
-- [ ] Album artwork imports and survives relaunch.
-- [ ] Play/pause produces audible playback only after tapping Play.
-- [ ] Previous/next and album/track selectors work.
-- [ ] Seek and volume controls work.
-- [ ] Shuffle, repeat-all, and repeat-one work.
-- [ ] Selected track and approximate position survive relaunch without autoplay.
-- [ ] Writing and focus mode do not unexpectedly stop playback.
-- [ ] Remove Track and Remove Album affect only the imported browser copies.
-- [ ] Airplane Mode launches with imported music and artwork available.
+- [x] Existing draft and all Phase 2 private imports remain intact after the update.
+- [x] Tracks import from Files into the chosen artist and album.
+- [x] Album artwork imports and survives relaunch.
+- [x] Play/pause produces audible playback only after tapping Play.
+- [x] Previous/next and album/track selectors work.
+- [x] Seek and volume controls work.
+- [x] Shuffle, repeat-all, and repeat-one work.
+- [x] Selected track and approximate position survive relaunch without autoplay.
+- [x] Writing and focus mode do not unexpectedly stop playback.
+- [x] Remove Track and Remove Album affect only the imported browser copies.
+- [x] Airplane Mode launches with imported music and artwork available.
+
+**Acceptance recorded:** 2026-07-19. The user reported that Phase 3, including the MP3 metadata/artwork and playback-pausing refinements, worked perfectly.
+
+## Phase 4 iPad acceptance checklist
+
+- [ ] Existing draft and all Phase 2/3 local imports remain intact.
+- [ ] Project, scene/chapter, and manual manuscript total can be edited and persist.
+- [ ] Draft highlight follows the Quiet Draft title.
+- [ ] Session words update with net additions/removals and reset after relaunch.
+- [ ] Today’s words update with net additions/removals and persist after relaunch.
+- [ ] Last autosave changes after autosave or **Save Locally**.
+- [ ] Last export changes after **Export .txt**.
+- [ ] Landscape Highlights remain quiet and every side module still scrolls.
+- [ ] Portrait keeps the editor first and allows horizontal Highlights scrolling.
+- [ ] Focus Mode, music, backgrounds, sounds, and export remain functional.
+- [ ] Airplane Mode restores the draft and persisted Highlights.

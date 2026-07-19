@@ -1,6 +1,6 @@
 # Dreamspeak Command Center — Quiet Draft
 
-Dreamspeak Command Center is a dark, local-first creative shell built around Quiet Draft, its distraction-free scene editor for iPad. Phase 3 adds a private local discography player while keeping every writing and supporting-module behavior intact. It runs entirely in the browser, saves the current draft on the device, and works offline after its first successful load.
+Dreamspeak Command Center is a dark, local-first creative shell built around Quiet Draft, its distraction-free scene editor for iPad. Phase 4 adds quiet writing metrics and persistent project context while keeping every writing and supporting-module behavior intact. It runs entirely in the browser, saves the current draft on the device, and works offline after its first successful load.
 
 There is no login, cloud sync, AI, analytics, or external service. Draft text is stored only in the browser's local storage. Export or copy the text when you are ready to move it into Scrivener.
 
@@ -14,7 +14,9 @@ There is no login, cloud sync, AI, analytics, or external service. Draft text is
 - Private gallery-image imports stored only on the current device
 - Private local discography with albums, tracks, artwork, seek, volume, shuffle, and repeat
 - Remembered music selection and playback position without autoplay
-- Quiet placeholders for future music, tools, and the separate local Wiki
+- Current project, draft, and scene/chapter highlights
+- Session words, today’s net words, last autosave, last export, and manual manuscript total
+- Quiet placeholders for future tools and the separate local Wiki
 - Full-screen, responsive writing space
 - Automatic local saving while you type
 - Manual **Save Locally** button and `Command-S` shortcut
@@ -121,6 +123,12 @@ Open **Manage Local Library**, choose **Add Tracks**, and select audio files fro
 Audio, tags, and artwork are read locally and copied into IndexedDB only after an explicit import. They are not committed, uploaded, streamed, or placed in the service-worker cache. The player never starts automatically and pauses when the app leaves the foreground. It remembers the selected track, approximate position, volume, shuffle, and repeat preferences for the next launch.
 
 MP3, M4A, and WAV are the safest iPad formats. Embedded metadata is currently read from ID3-tagged MP3 files; other formats use the fallback fields and filename-derived title. Retain every original in Files, and remember that Safari may remove local website data when storage is cleared or under device pressure.
+
+## Writing metrics and highlights
+
+Edit **Current project**, **Scene / chapter**, and **Manuscript total** directly in the Highlights panel. Those values, today’s net word change, and the last export time use the local-only `dreamspeak.writing-metrics.v1` record. The current draft comes from the existing title field, and the last autosave comes from the existing draft record.
+
+**Session words** begin at zero whenever the app launches or reloads. **Today’s words** records net words added or removed through editor input on the current device and resets when the app observes a new local calendar date. Starting a new draft does not count clearing the previous draft as negative writing. These are drafting aids rather than a manuscript audit; they do not scan Scrivener, imported manuscripts, or writing performed on another device.
 
 ## Optional local background images
 

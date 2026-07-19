@@ -217,7 +217,19 @@ Test play/pause, previous/next, seek, volume, shuffle, and all three repeat stat
 
 To remove music, select the album and track, expand **Manage Local Library**, and use **Remove Track** or **Remove Album**. This removes only the browser's imported copy.
 
-## 9. Test offline use
+## 9. Use writing metrics and highlights
+
+The Highlights strip contains editable **Current project**, **Scene / chapter**, and **Manuscript total** fields. Tap a value to change it. The current draft name follows the Quiet Draft title automatically.
+
+- **Session words** starts at zero each time the app launches or reloads and shows the net words added or removed during that session.
+- **Today’s words** persists across reloads and resets on the next local calendar date observed by the app.
+- **Last autosave** updates after a successful local save.
+- **Last export** updates after **Export .txt** is used.
+- **Manuscript total** is manual; enter the latest total from Scrivener when useful.
+
+Metrics stay only on this device. They do not scan Scrivener, synchronize between Mac and iPad, include changes made outside Quiet Draft, or serve as a permanent writing ledger. Export remains the safety copy for important prose.
+
+## 10. Test offline use
 
 1. While still online, launch Quiet Draft from the Home Screen.
 2. Select every repository-hosted background you expect to use offline at least once. This lets the service worker cache the image.
@@ -238,7 +250,7 @@ To remove music, select the album and track, expand **Manage Local Library**, an
 
 Locally imported backgrounds and sounds are already on the iPad and do not need a network connection. Repository-hosted backgrounds should be selected once online before relying on them during travel.
 
-## 10. Add a public background to every installation
+## 11. Add a public background to every installation
 
 Use this method only for images you are comfortable making public. Any image committed to the public GitHub repository can be viewed or downloaded by other people.
 
@@ -260,7 +272,7 @@ The deployment automatically rebuilds `backgrounds/backgrounds.json`, so image f
 
 Do not commit personal typing sounds to this repository. The project’s `.gitignore` intentionally excludes common audio formats, and Quiet Draft’s private sound importer is the supported Version 1 workflow.
 
-## 11. Backups, updates, and data safety
+## 12. Backups, updates, and data safety
 
 ### Back up writing
 

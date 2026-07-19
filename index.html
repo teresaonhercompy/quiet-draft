@@ -8,9 +8,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Dreamspeak">
-    <link rel="manifest" href="manifest.webmanifest?v=20260719-6">
-    <link rel="icon" href="icon.svg?v=20260719-6" type="image/svg+xml">
-    <link rel="stylesheet" href="styles.css?v=20260719-6">
+    <link rel="manifest" href="manifest.webmanifest?v=20260719-7">
+    <link rel="icon" href="icon.svg?v=20260719-7" type="image/svg+xml">
+    <link rel="stylesheet" href="styles.css?v=20260719-7">
     <title>Dreamspeak Command Center</title>
   </head>
   <body>
@@ -56,21 +56,37 @@
           <h1 id="highlights-title">Highlights</h1>
         </div>
         <div class="highlight-list">
+          <label class="highlight-item highlight-editable" for="metric-project">
+            <span>Current project</span>
+            <input class="highlight-input" id="metric-project" type="text" value="Inheritance Dust" maxlength="100" autocomplete="off">
+          </label>
           <div class="highlight-item">
-            <span>Current novel</span>
-            <strong>Inheritance Dust</strong>
+            <span>Draft / phase</span>
+            <strong id="metric-current-draft">Untitled Draft</strong>
+          </div>
+          <label class="highlight-item highlight-editable" for="metric-scene">
+            <span>Scene / chapter</span>
+            <input class="highlight-input" id="metric-scene" type="text" placeholder="Add scene" maxlength="120" autocomplete="off">
+          </label>
+          <div class="highlight-item metric-number">
+            <span>Session words</span>
+            <strong id="metric-session-words">0</strong>
+          </div>
+          <div class="highlight-item metric-number">
+            <span>Today’s words</span>
+            <strong id="metric-today-words">0</strong>
+          </div>
+          <label class="highlight-item highlight-editable metric-number" for="metric-manuscript-total">
+            <span>Manuscript total</span>
+            <input class="highlight-input" id="metric-manuscript-total" type="number" value="0" min="0" max="9999999" step="1" inputmode="numeric">
+          </label>
+          <div class="highlight-item">
+            <span>Last autosave</span>
+            <strong id="metric-last-autosave">Not yet</strong>
           </div>
           <div class="highlight-item">
-            <span>Workspace</span>
-            <strong>Quiet Draft</strong>
-          </div>
-          <div class="highlight-item">
-            <span>Draft safety</span>
-            <strong><span class="mini-status" aria-hidden="true"></span>On this device</strong>
-          </div>
-          <div class="highlight-item">
-            <span>Build</span>
-            <strong>Phase 3 · Listening</strong>
+            <span>Last export</span>
+            <strong id="metric-last-export">Not yet</strong>
           </div>
         </div>
       </section>
@@ -390,7 +406,7 @@
       <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
     </div>
 
-    <script src="music-metadata.js?v=20260719-6" defer></script>
-    <script src="app.js?v=20260719-6" defer></script>
+    <script src="music-metadata.js?v=20260719-7" defer></script>
+    <script src="app.js?v=20260719-7" defer></script>
   </body>
 </html>

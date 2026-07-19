@@ -13,6 +13,7 @@
   const MUSIC_TRACK_STORE = "music-tracks";
   const MUSIC_ARTWORK_STORE = "music-artwork";
   const MUSIC_STATE_KEY = "dreamspeak.music-player.v1";
+  const WRITING_METRICS_KEY = "dreamspeak.writing-metrics.v1";
   const AUTOSAVE_DELAY = 650;
   const DEFAULT_ATMOSPHERE = {
     background: "none",
@@ -60,6 +61,14 @@
     characterCount: document.querySelector("#character-count"),
     saveStatus: document.querySelector("#save-status"),
     statusDot: document.querySelector(".status-dot"),
+    metricProject: document.querySelector("#metric-project"),
+    metricCurrentDraft: document.querySelector("#metric-current-draft"),
+    metricScene: document.querySelector("#metric-scene"),
+    metricSessionWords: document.querySelector("#metric-session-words"),
+    metricTodayWords: document.querySelector("#metric-today-words"),
+    metricManuscriptTotal: document.querySelector("#metric-manuscript-total"),
+    metricLastAutosave: document.querySelector("#metric-last-autosave"),
+    metricLastExport: document.querySelector("#metric-last-export"),
     toast: document.querySelector("#toast"),
     factCategory: document.querySelector("#fact-category"),
     factSpeaker: document.querySelector("#fact-speaker"),
@@ -142,6 +151,16 @@
     shuffle: false,
     repeat: "off"
   };
+  let writingMetrics = {
+    project: "Inheritance Dust",
+    scene: "",
+    manuscriptTotal: 0,
+    todayDate: "",
+    todayWords: 0,
+    lastExportAt: null
+  };
+  let sessionWordDelta = 0;
+  let observedWordCount = 0;
   const customSoundBuffers = new Map();
   let atmosphere = { ...DEFAULT_ATMOSPHERE };
 
@@ -1403,6 +1422,94 @@
     return trimmed ? trimmed.split(/\s+/u).length : 0;
   }
 
+  function localDateKey(date = new Date()) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  function loadWritingMetrics() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(WRITING_METRICS_KEY));
+      if (saved && typeof saved === "object") writingMetrics = { ...writingMetrics, ...saved };
+    } catch (error) {
+      console.warn("Quiet Draft found unreadable writing metrics.", error);
+    }
+    writingMetrics.project = typeof writingMetrics.project === "string" ? writingMetrics.project.slice(0, 100) : "Inheritance Dust";
+    writingMetrics.scene = typeof writingMetrics.scene === "string" ? writingMetrics.scene.slice(0, 120) : "";
+    writingMetrics.manuscriptTotal = Math.round(numberInRange(writingMetrics.manuscriptTotal, 0, 9999999, 0));
+    writingMetrics.todayWords = Math.trunc(numberInRange(writingMetrics.todayWords, -9999999, 9999999, 0));
+    writingMetrics.todayDate = typeof writingMetrics.todayDate === "string" ? writingMetrics.todayDate : "";
+    writingMetrics.lastExportAt = typeof writingMetrics.lastExportAt === "string" ? writingMetrics.lastExportAt : null;
+    if (writingMetrics.todayDate !== localDateKey()) {
+      writingMetrics.todayDate = localDateKey();
+      writingMetrics.todayWords = 0;
+    }
+    saveWritingMetrics();
+  }
+
+  function saveWritingMetrics() {
+    try {
+      localStorage.setItem(WRITING_METRICS_KEY, JSON.stringify(writingMetrics));
+    } catch (error) {
+      console.warn("Quiet Draft could not save writing metrics.", error);
+    }
+  }
+
+  function ensureMetricsDate() {
+    const today = localDateKey();
+    if (writingMetrics.todayDate === today) return;
+    writingMetrics.todayDate = today;
+    writingMetrics.todayWords = 0;
+    saveWritingMetrics();
+  }
+
+  function formatWordDelta(value) {
+    const words = Math.trunc(Number(value) || 0);
+    if (words > 0) return `+${words.toLocaleString()}`;
+    if (words < 0) return `−${Math.abs(words).toLocaleString()}`;
+    return "0";
+  }
+
+  function formatMetricTimestamp(value) {
+    const date = value instanceof Date ? value : new Date(value || "");
+    if (Number.isNaN(date.getTime())) return "Not yet";
+    const time = formatSaveTime(date);
+    if (localDateKey(date) === localDateKey()) return `Today ${time}`;
+    return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(date);
+  }
+
+  function renderWritingMetrics() {
+    ensureMetricsDate();
+    elements.metricProject.value = writingMetrics.project;
+    elements.metricCurrentDraft.textContent = elements.title.value.trim() || "Untitled Draft";
+    elements.metricScene.value = writingMetrics.scene;
+    elements.metricSessionWords.textContent = formatWordDelta(sessionWordDelta);
+    elements.metricTodayWords.textContent = formatWordDelta(writingMetrics.todayWords);
+    elements.metricManuscriptTotal.value = String(writingMetrics.manuscriptTotal);
+    elements.metricLastAutosave.textContent = formatMetricTimestamp(lastSavedAt);
+    elements.metricLastExport.textContent = formatMetricTimestamp(writingMetrics.lastExportAt);
+  }
+
+  function initializeWritingMetrics() {
+    sessionWordDelta = 0;
+    observedWordCount = countWords(elements.body.value);
+    renderWritingMetrics();
+  }
+
+  function recordWritingDelta() {
+    ensureMetricsDate();
+    const nextCount = countWords(elements.body.value);
+    const delta = nextCount - observedWordCount;
+    observedWordCount = nextCount;
+    if (!delta) return;
+    sessionWordDelta += delta;
+    writingMetrics.todayWords += delta;
+    saveWritingMetrics();
+    renderWritingMetrics();
+  }
+
   function updateCounts() {
     const text = elements.body.value;
     elements.wordCount.textContent = countWords(text).toLocaleString();
@@ -1439,6 +1546,7 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
       lastSavedAt = new Date(draft.updatedAt);
       setSaveStatus(`Saved locally at ${formatSaveTime(lastSavedAt)}`);
+      renderWritingMetrics();
       if (announce) showToast("Draft saved on this device");
     } catch (error) {
       setSaveStatus("Could not save locally", true);
@@ -1485,7 +1593,9 @@
 
     elements.title.value = "Untitled Draft";
     elements.body.value = "";
+    observedWordCount = 0;
     updateCounts();
+    renderWritingMetrics();
     resizeEditor();
     saveDraft();
     elements.title.focus();
@@ -1526,6 +1636,9 @@
     link.click();
     link.remove();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    writingMetrics.lastExportAt = new Date().toISOString();
+    saveWritingMetrics();
+    renderWritingMetrics();
     showToast("Text file exported");
   }
 
@@ -1617,13 +1730,29 @@
   }
 
   function handleEditorInput() {
+    recordWritingDelta();
     updateCounts();
     resizeEditor();
     scheduleSave();
   }
 
-  elements.title.addEventListener("input", scheduleSave);
+  elements.title.addEventListener("input", () => {
+    renderWritingMetrics();
+    scheduleSave();
+  });
   elements.body.addEventListener("input", handleEditorInput);
+  elements.metricProject.addEventListener("input", () => {
+    writingMetrics.project = elements.metricProject.value.slice(0, 100);
+    saveWritingMetrics();
+  });
+  elements.metricScene.addEventListener("input", () => {
+    writingMetrics.scene = elements.metricScene.value.slice(0, 120);
+    saveWritingMetrics();
+  });
+  elements.metricManuscriptTotal.addEventListener("input", () => {
+    writingMetrics.manuscriptTotal = Math.round(numberInRange(elements.metricManuscriptTotal.value, 0, 9999999, 0));
+    saveWritingMetrics();
+  });
   elements.newDraft.addEventListener("click", newDraft);
   elements.saveDraft.addEventListener("click", () => saveDraft({ announce: true }));
   elements.exportDraft.addEventListener("click", exportDraft);
@@ -1733,6 +1862,8 @@
     if (document.visibilityState === "hidden") {
       pauseMusicForBackground();
       saveDraft();
+    } else {
+      renderWritingMetrics();
     }
   });
   window.addEventListener("pagehide", () => {
@@ -1744,6 +1875,7 @@
 
   loadAtmosphere();
   loadMusicState();
+  loadWritingMetrics();
   applyTheme(preferredTheme());
   updateConnectionStatus();
   applyAtmosphere();
@@ -1753,12 +1885,13 @@
   loadGallery();
   loadMusicLibrary({ restorePosition: true });
   loadDraft();
+  initializeWritingMetrics();
   updateCounts();
   resizeEditor();
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260719-6")
+      navigator.serviceWorker.register("./service-worker.js?v=20260719-7")
         .then((registration) => registration.update())
         .catch((error) => {
           if (!navigator.serviceWorker.controller) {
