@@ -8,9 +8,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Dreamspeak">
-    <link rel="manifest" href="manifest.webmanifest?v=20260719-7">
-    <link rel="icon" href="icon.svg?v=20260719-7" type="image/svg+xml">
-    <link rel="stylesheet" href="styles.css?v=20260719-7">
+    <link rel="manifest" href="manifest.webmanifest?v=20260719-8">
+    <link rel="icon" href="icon.svg?v=20260719-8" type="image/svg+xml">
+    <link rel="stylesheet" href="styles.css?v=20260719-8">
     <title>Dreamspeak Command Center</title>
   </head>
   <body>
@@ -27,7 +27,7 @@
         <div class="project-context" aria-label="Current workspace">
           <span>Inheritance Dust</span>
           <span aria-hidden="true">/</span>
-          <strong>Write</strong>
+          <strong id="current-tool-label">Write</strong>
         </div>
 
         <div class="connection-pill" id="connection-status" role="status" aria-live="polite">
@@ -135,17 +135,38 @@
 
         <section class="center-workspace" aria-label="Main writing workspace">
           <section class="module-card tool-switcher" aria-labelledby="tool-switcher-title">
-            <div class="tool-switcher-copy">
-              <span class="eyebrow">Workspace</span>
-              <h2 id="tool-switcher-title">Tool Center</h2>
+            <div class="tool-switcher-main">
+              <div class="tool-switcher-copy">
+                <span class="eyebrow">Workspace</span>
+                <h2 id="tool-switcher-title">Tool Center</h2>
+              </div>
+              <div class="tool-tabs" id="tool-tabs" role="toolbar" aria-label="Command Center tools"></div>
+              <p class="tool-note" id="tool-note"><strong>Write:</strong> your local draft remains the default workspace.</p>
             </div>
-            <div class="tool-tabs" role="toolbar" aria-label="Command Center tools">
-              <button class="tool-tab active" type="button" aria-pressed="true">Write</button>
-              <button class="tool-tab" type="button" disabled>Wiki</button>
-              <button class="tool-tab" type="button" disabled>Images</button>
-              <button class="tool-tab" type="button" disabled>Music</button>
+
+            <div class="tool-detail" id="tool-detail" aria-live="polite" hidden>
+              <div class="tool-detail-heading">
+                <div>
+                  <span class="eyebrow" id="tool-detail-kind">External launcher</span>
+                  <h3 id="tool-detail-title">Tool</h3>
+                </div>
+                <span class="placeholder-badge" id="tool-detail-status">Local setup</span>
+              </div>
+              <p class="tool-detail-copy" id="tool-detail-copy"></p>
+              <div class="tool-config-fields" id="tool-url-fields">
+                <label for="tool-url">Web address</label>
+                <input id="tool-url" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://…">
+              </div>
+              <div class="tool-config-fields" id="tool-question-fields" hidden>
+                <label for="tool-question">Prepared question</label>
+                <textarea id="tool-question" rows="2" maxlength="1000"></textarea>
+              </div>
+              <div class="tool-detail-actions">
+                <button class="module-button" id="tool-primary-action" type="button">Open in New Tab</button>
+                <button class="module-button secondary" id="tool-copy-question" type="button" hidden>Copy Question</button>
+              </div>
+              <p class="tool-privacy-note">The address and prepared question stay on this device. Quiet Draft never sends your draft to this tool.</p>
             </div>
-            <p class="tool-note"><strong>Wiki placeholder:</strong> the private archive remains separate and local.</p>
           </section>
 
           <section class="editor-module" aria-labelledby="editor-module-title">
@@ -406,7 +427,7 @@
       <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
     </div>
 
-    <script src="music-metadata.js?v=20260719-7" defer></script>
-    <script src="app.js?v=20260719-7" defer></script>
+    <script src="music-metadata.js?v=20260719-8" defer></script>
+    <script src="app.js?v=20260719-8" defer></script>
   </body>
 </html>

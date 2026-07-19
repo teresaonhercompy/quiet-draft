@@ -1,4 +1,4 @@
-const VERSION = "20260719-7";
+const VERSION = "20260719-8";
 const CACHE_NAME = `quiet-draft-${VERSION}`;
 const APP_SHELL = [
   "./",
