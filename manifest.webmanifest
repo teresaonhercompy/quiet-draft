@@ -3,7 +3,7 @@
   "short_name": "Dreamspeak",
   "description": "A private, local-first writing command center for the Dreamspeak universe.",
   "id": "./",
-  "start_url": "./?v=20260719-4",
+  "start_url": "./?v=20260719-5",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
