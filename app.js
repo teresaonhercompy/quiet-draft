@@ -1714,7 +1714,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260719-3")
+      navigator.serviceWorker.register("./service-worker.js?v=20260719-4")
         .then((registration) => registration.update())
         .catch((error) => {
           if (!navigator.serviceWorker.controller) {
