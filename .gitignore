@@ -10,3 +10,8 @@
 *.m4a
 *.aac
 *.ogg
+
+# Private canon exports are transferred directly to personal devices, never published.
+*.dreamspeak-canon.json
+dreamspeak-canon*.json
+private-canon/

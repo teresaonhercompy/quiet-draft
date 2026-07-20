@@ -1,6 +1,6 @@
 # Dreamspeak Command Center — Quiet Draft
 
-Dreamspeak Command Center is a dark, local-first creative shell built around Quiet Draft, its distraction-free scene editor for iPad. Phase 5 adds a private, configurable Tool Center while keeping every writing and supporting-module behavior intact. It runs entirely in the browser, saves the current draft on the device, and works offline after its first successful load.
+Dreamspeak Command Center is a dark, local-first creative shell built around Quiet Draft, its distraction-free scene editor for iPad. The Phase 6 prototype adds private, read-only canon search without publishing the manuscript. It runs entirely in the browser, saves the current draft on the device, and works offline after its first successful load.
 
 There is no login, cloud sync, AI, analytics, or external service. Draft text is stored only in the browser's local storage. Export or copy the text when you are ready to move it into Scrivener.
 
@@ -17,6 +17,8 @@ There is no login, cloud sync, AI, analytics, or external service. Draft text is
 - Current project, draft, and scene/chapter highlights
 - Session words, today’s net words, last autosave, last export, and manual manuscript total
 - Data-driven Tool Center for Write, Wiki, Motifs, Timeline, Images, Music, and Notebook
+- Private canon-package import with local word and quoted-phrase search
+- Chronological canon results with previous/current/next context
 - Device-local launcher addresses and an editable prepared Notebook question
 - Full-screen, responsive writing space
 - Automatic local saving while you type
@@ -133,9 +135,21 @@ Edit **Current project**, **Scene / chapter**, and **Manuscript total** directly
 
 ## Tool Center
 
-**Write** is selected on every launch. Choosing any tool saves the current draft first. **Images** and **Music** move to the existing device-local modules; **Wiki**, **Motifs**, **Timeline**, and **Notebook** expose a compact launcher where a complete `http://` or `https://` address can be stored for that device.
+**Write** is selected on every launch. Choosing any tool saves the current draft first. **Images** and **Music** move to the existing device-local modules. **Wiki** opens the private canon-search workspace, while **Motifs**, **Timeline**, and **Notebook** retain their configurable launchers.
 
-Launcher settings and the prepared Notebook question use the additive local-only `dreamspeak.tool-center.v1` record. External destinations open with new-tab and opener protections. Quiet Draft does not embed external pages, authenticate to them, send draft text, scrape NotebookLM, or automate a Google browser session. A normal hosted web app cannot launch arbitrary private files from Files, so the Wiki launcher requires an address reachable by Safari; it can remain unconfigured until an approved Wiki architecture is available.
+The Wiki workspace imports a private `.dreamspeak-canon.json` file only after you choose it. Passages are stored in a separate `dreamspeak-canon` browser database, searched locally, and never sent to the host or included in the service-worker cache. The optional **Open the authoritative Mac Wiki** section preserves the existing launcher for notes and motif reports.
+
+To create the private package on a Mac, run this from the project folder, substituting paths you control:
+
+```bash
+python3 tools/export_canon_archive.py \
+  --database "/path/to/dreamspeak.sqlite" \
+  --output "/path/to/Dreamspeak.dreamspeak-canon.json"
+```
+
+Transfer the resulting file directly through AirDrop or Files, import it from the **Wiki** tab, and keep it out of GitHub. The package and original manuscript remain the backup and source of truth; Safari can remove website data if it is cleared or under storage pressure.
+
+Launcher settings and the prepared Notebook question use the additive local-only `dreamspeak.tool-center.v1` record. External destinations open with new-tab and opener protections. Quiet Draft does not embed external pages, authenticate to them, send draft or canon text, scrape NotebookLM, or automate a Google browser session.
 
 ## Optional local background images
 
@@ -164,6 +178,8 @@ The **Dark Glass** editor appearance uses white text on a translucent charcoal p
 - `index.html` — app structure and iPad/PWA metadata
 - `styles.css` — responsive light, dark, and focus-mode design
 - `app.js` — writing, local saving, counts, copy, and export behavior
+- `canon-core.js` — package validation and private in-browser search
+- `tools/export_canon_archive.py` — generic Mac exporter; generated packages are private and ignored by Git
 - `manifest.webmanifest` — install settings
 - `service-worker.js` — offline app cache
 - `icon.svg` — local app icon

@@ -8,9 +8,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Dreamspeak">
-    <link rel="manifest" href="manifest.webmanifest?v=20260719-8">
-    <link rel="icon" href="icon.svg?v=20260719-8" type="image/svg+xml">
-    <link rel="stylesheet" href="styles.css?v=20260719-8">
+    <link rel="manifest" href="manifest.webmanifest?v=20260719-9">
+    <link rel="icon" href="icon.svg?v=20260719-9" type="image/svg+xml">
+    <link rel="stylesheet" href="styles.css?v=20260719-9">
     <title>Dreamspeak Command Center</title>
   </head>
   <body>
@@ -166,6 +166,55 @@
                 <button class="module-button secondary" id="tool-copy-question" type="button" hidden>Copy Question</button>
               </div>
               <p class="tool-privacy-note">The address and prepared question stay on this device. Quiet Draft never sends your draft to this tool.</p>
+            </div>
+          </section>
+
+          <section class="canon-workspace" id="canon-workspace" aria-labelledby="canon-workspace-title" hidden>
+            <header class="canon-header">
+              <div>
+                <span class="eyebrow">Read-only archive</span>
+                <h2 id="canon-workspace-title">Dreamspeak Canon Search</h2>
+              </div>
+              <span class="private-badge"><span aria-hidden="true">◆</span> Private · This device</span>
+            </header>
+
+            <div class="canon-body">
+              <section class="canon-library" aria-labelledby="canon-library-title">
+                <div>
+                  <span class="eyebrow">Local library</span>
+                  <h3 id="canon-library-title">Canon Archive</h3>
+                  <p id="canon-archive-status">No canon archive is stored on this device.</p>
+                </div>
+                <div class="canon-library-actions">
+                  <label class="module-button canon-import-button" for="canon-archive-upload" id="canon-import-label">Import Canon Archive</label>
+                  <input id="canon-archive-upload" class="visually-hidden" type="file" accept="application/json,.json,.dreamspeak-canon.json">
+                  <button class="text-button" id="canon-remove-archive" type="button" disabled>Remove Local Archive</button>
+                </div>
+                <p class="canon-privacy-note">Imported text stays in this browser. It is never uploaded, fetched, or added to the offline app cache.</p>
+              </section>
+
+              <form class="canon-search" id="canon-search-form" role="search">
+                <label for="canon-search-input">Search words or an “exact phrase”</label>
+                <div class="canon-search-row">
+                  <input id="canon-search-input" type="search" autocomplete="off" maxlength="300" placeholder="Enter canon words or an “exact phrase”" disabled>
+                  <button class="module-button" id="canon-search-button" type="submit" disabled>Search</button>
+                </div>
+              </form>
+
+              <div class="canon-results-heading">
+                <p id="canon-results-status" role="status" aria-live="polite">Import a private canon archive to begin.</p>
+              </div>
+              <div class="canon-results" id="canon-results" aria-label="Canon search results"></div>
+
+              <details class="canon-mac-wiki">
+                <summary>Open the authoritative Mac Wiki</summary>
+                <p>Notes and motif reports remain in the existing Mac Wiki during this read-only prototype.</p>
+                <div class="canon-mac-row">
+                  <label for="canon-wiki-url">Wiki address</label>
+                  <input id="canon-wiki-url" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="http://… or https://…">
+                  <button class="module-button secondary" id="canon-open-wiki" type="button">Open Mac Wiki</button>
+                </div>
+              </details>
             </div>
           </section>
 
@@ -427,7 +476,8 @@
       <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
     </div>
 
-    <script src="music-metadata.js?v=20260719-8" defer></script>
-    <script src="app.js?v=20260719-8" defer></script>
+    <script src="music-metadata.js?v=20260719-9" defer></script>
+    <script src="canon-core.js?v=20260719-9" defer></script>
+    <script src="app.js?v=20260719-9" defer></script>
   </body>
 </html>

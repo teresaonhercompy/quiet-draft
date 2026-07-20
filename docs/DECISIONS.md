@@ -208,3 +208,15 @@
 **Alternatives considered:** Embed every destination in an iframe; hard-code personal URLs; automate NotebookLM; upload the Wiki into the public shell; persist the last active tool; add a backend.
 
 **Consequences:** Every switch saves the draft, but Write returns on launch. External tools require a complete address configured separately on each device and need connectivity unless the destination has its own offline support. The app never transmits the draft, stores credentials, scrapes NotebookLM, or makes private files public.
+
+## DCC-019 — Phase 6 uses an explicit-import, read-only browser index
+
+**Date:** 2026-07-19
+
+**Decision:** The user approved Strategy B and its read-only prototype scope. A generic Mac exporter creates a versioned private canon package from the existing SQLite `chunks` table. The iPad imports that package explicitly into a separate `dreamspeak-canon` IndexedDB database and performs word and quoted-phrase search entirely in the browser.
+
+**Reason:** This keeps manuscript prose on the user's devices, supports Airplane Mode, preserves chronological chunk order and titles, and adds no backend, account, cloud sync, AI, or hosting cost.
+
+**Alternatives considered:** Keep search solely in the external Streamlit Wiki; place the corpus behind a private authenticated backend; publish an obfuscated or unlisted data file.
+
+**Consequences:** Generated canon packages are excluded from Git and the service-worker cache. Imports, replacements, removals, search, snippets, and neighboring context are local. The Mac Streamlit Wiki remains authoritative for editable notes and motif reports. Each device requires its own import, and the original database/package remains the backup because Safari may evict browser data.
