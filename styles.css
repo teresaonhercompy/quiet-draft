@@ -489,7 +489,8 @@ button:disabled {
 }
 
 .module-card,
-.editor-module {
+.editor-module,
+.canon-workspace {
   border: 1px solid var(--color-border);
   border-radius: 14px;
   background:
@@ -499,7 +500,8 @@ button:disabled {
 }
 
 :root[data-theme="light"] .module-card,
-:root[data-theme="light"] .editor-module {
+:root[data-theme="light"] .editor-module,
+:root[data-theme="light"] .canon-workspace {
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.45), transparent 42%),
     var(--color-surface);
@@ -864,6 +866,207 @@ button:disabled {
   grid-template-rows: auto minmax(0, 1fr) auto;
   min-height: 0;
   overflow: hidden;
+}
+
+.editor-module[hidden],
+.canon-workspace[hidden] {
+  display: none;
+}
+
+.canon-workspace {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.canon-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 54px;
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface-soft);
+  gap: 12px;
+}
+
+.canon-header h2,
+.canon-library h3,
+.canon-result-card h4,
+.canon-context-passage h5 {
+  margin: 2px 0 0;
+}
+
+.canon-body {
+  min-height: 0;
+  padding: 16px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.canon-library {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 13px;
+  border: 1px solid var(--color-border);
+  border-radius: 11px;
+  background: var(--color-surface-soft);
+  gap: 10px 16px;
+}
+
+.canon-library h3 {
+  font-size: 0.92rem;
+}
+
+.canon-library p,
+.canon-results-heading p,
+.canon-mac-wiki p {
+  margin: 6px 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.66rem;
+  line-height: 1.5;
+}
+
+.canon-library-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.canon-import-button,
+.canon-search-row .module-button,
+.canon-mac-row .module-button {
+  display: inline-grid;
+  width: auto;
+  min-width: 138px;
+  padding: 0 13px;
+  place-items: center;
+  color: var(--color-text);
+  opacity: 1;
+}
+
+.canon-privacy-note {
+  grid-column: 1 / -1;
+  color: var(--color-text-faint) !important;
+}
+
+.canon-search {
+  margin-top: 14px;
+}
+
+.canon-search > label,
+.canon-mac-row label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--color-text-faint);
+  font-size: 0.61rem;
+  font-weight: 650;
+}
+
+.canon-search-row,
+.canon-mac-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.canon-search-row input,
+.canon-mac-row input {
+  width: 100%;
+  min-width: 0;
+  min-height: 39px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+  background: var(--color-surface-elevated);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.72rem;
+}
+
+.canon-results-heading {
+  min-height: 31px;
+  padding: 6px 2px;
+}
+
+.canon-results {
+  display: grid;
+  gap: 10px;
+}
+
+.canon-result-card {
+  padding: 13px;
+  border: 1px solid var(--color-border);
+  border-radius: 11px;
+  background: rgba(8, 7, 11, 0.18);
+}
+
+.canon-result-number {
+  color: var(--color-accent);
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.canon-result-card h4 {
+  color: var(--color-text);
+  font-family: var(--serif);
+  font-size: 0.9rem;
+}
+
+.canon-snippet {
+  margin: 8px 0;
+  color: var(--color-text-muted);
+  font-family: var(--serif);
+  font-size: 0.76rem;
+  line-height: 1.6;
+}
+
+.canon-context summary,
+.canon-mac-wiki summary {
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 0.64rem;
+  font-weight: 650;
+}
+
+.canon-context-passage {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border);
+}
+
+.canon-context-passage h5 {
+  color: var(--color-text-faint);
+  font-size: 0.61rem;
+}
+
+.canon-context-passage p {
+  margin: 6px 0 0;
+  color: var(--color-text);
+  font-family: var(--serif);
+  font-size: 0.76rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.canon-mac-wiki {
+  margin-top: 14px;
+  padding: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.canon-mac-row {
+  align-items: end;
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-top: 10px;
+}
+
+.canon-mac-row label {
+  grid-column: 1 / -1;
+  margin: 0;
 }
 
 .editor-chrome {
@@ -2032,6 +2235,14 @@ body.focus-mode .page {
     min-height: 690px;
   }
 
+  .canon-workspace {
+    min-height: 690px;
+  }
+
+  .canon-body {
+    overflow: visible;
+  }
+
   .page {
     padding-right: clamp(24px, 8vw, 64px);
     padding-left: clamp(24px, 8vw, 64px);
@@ -2091,6 +2302,26 @@ body.focus-mode .page {
 
   .editor-module {
     min-height: 680px;
+  }
+
+  .canon-library {
+    grid-template-columns: 1fr;
+  }
+
+  .canon-library-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .canon-search-row,
+  .canon-mac-row {
+    grid-template-columns: 1fr;
+  }
+
+  .canon-search-row .module-button,
+  .canon-mac-row .module-button,
+  .canon-import-button {
+    width: 100%;
   }
 
   .editor-chrome {

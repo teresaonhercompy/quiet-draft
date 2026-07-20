@@ -2,13 +2,13 @@
 
 **Updated:** 2026-07-19
 
-**Current phase:** Phase 5 — Tool Center
+**Current phase:** Phase 6 — Canon Search Integration Study and Prototype
 
-**Phase state:** Local implementation complete; ready for publication and physical-iPad acceptance
+**Phase state:** Strategy B approved; read-only local canon-search prototype in implementation and test
 
-**Current production version:** Dreamspeak Command Center Phase 4 / service-worker cache `20260719-7`
+**Current production version:** Dreamspeak Command Center Phase 5 / service-worker cache `20260719-8`
 
-**Phase 5 candidate:** service-worker cache `20260719-8`
+**Phase 6 candidate:** service-worker cache `20260719-9`
 
 **Production:** <https://teresaonhercompy.github.io/quiet-draft/>
 
@@ -73,11 +73,26 @@
 - Forced a local draft save before every tool switch and external launch.
 - Limited external launchers to validated `http` and `https` addresses opened with new-tab and opener protections.
 - Added the additive `dreamspeak.tool-center.v1` record without changing any draft, metric, atmosphere, content, gallery, or music storage.
+- Merged pull request #10, deployed cache `20260719-8`, and received complete physical-iPad acceptance.
+
+### Phase 6 — Canon search integration study
+
+- Compared the external Streamlit Wiki, a device-local browser index, and a private authenticated backend.
+- Audited the existing Wiki schema without reading or publishing manuscript prose.
+- Confirmed 4,644 chronologically numbered chunks, retained track/chapter titles, SQLite FTS5 search, notes, context, and motif-report behavior.
+- Recommended an explicit-import, device-local browser index that keeps generated canon data out of Git, hosting, fetches, and the service-worker cache.
+- Defined a read-only first prototype boundary while keeping the Mac Streamlit Wiki authoritative for notes and motif reports.
+- Documented current official Streamlit, browser-storage, Cloudflare Access, Workers, and D1 constraints in `docs/PHASE_6_ARCHITECTURE_STUDY.md`.
+- Recorded the user's explicit approval of Strategy B and the read-only prototype scope.
+- Added a generic SQLite-to-canon-package Mac exporter and validated it against synthetic data.
+- Added strict package validation, separate local canon storage, atomic replacement, local removal, word and quoted-phrase search, chronological results, and neighboring context.
+- Preserved the authoritative Mac Wiki launcher for deferred notes and motif-report behavior.
+- Kept generated canon packages out of Git, fetches, and the service-worker cache; only synthetic search data appears in tests.
+- Generated and validated a private 4,644-passage package outside the public repository for physical-iPad acceptance.
 
 ## In-progress work
 
-- Publication of the Phase 5 candidate branch.
-- Physical-iPad acceptance of tool switching, local launcher configuration, prepared-question copy, layout, and offline use.
+- Publish the locally validated Strategy B candidate and provide the physical-iPad acceptance sequence.
 
 ## Known observations
 
@@ -90,11 +105,11 @@
 
 ## Next approved task
 
-No Phase 6 implementation is approved. The next task is Phase 5 deployment and physical-iPad acceptance only.
+Complete local validation of the approved Strategy B prototype, publish the candidate, and hand off a private iPad import/search test sequence.
 
-## Last tested candidate
+## Last tested production baseline
 
-- **Local candidate:** service-worker cache `20260719-8`
+- **Production baseline:** service-worker cache `20260719-8`
 - **Syntax/data validation:** passed for JavaScript and JSON
 - **Privacy:** no tracked audio; no audio in the service-worker app shell; test fixture hook removed before commit
 - **Empty library:** silent, stable, and all unavailable transport controls disabled
@@ -122,8 +137,17 @@ No Phase 6 implementation is approved. The next task is Phase 5 deployment and p
 - **Phase 5 landscape:** 1180×820, no horizontal/page overflow; all seven tabs fit; expanded Notebook panel leaves a 316px editor and Focus Mode restores 820px
 - **Phase 5 portrait:** 820×1180, no horizontal overflow; editor remains ahead of supporting modules and normal page scrolling reaches them
 - **Phase 5 offline:** seven tools, exact draft, and prepared question restored with the local server stopped; no app warnings or errors
-- **Current production `main`:** `4b1de0d`; Phase 4
-- **Phase 5 branch:** `feature/phase-5-tool-center`
+- **Phase 6 package contract:** schema, count, unique identifiers, chronology, word search, quoted-phrase search, and rejection paths passed synthetic automated tests
+- **Phase 6 exporter:** synthetic SQLite export preserved titles and emitted passages in numeric manuscript order
+- **Phase 6 private package:** the local 4,644-passage export validated successfully without entering the repository
+- **Phase 6 empty state:** import is available while search and removal remain disabled until an archive exists
+- **Phase 6 layouts:** 1180×820 and 820×1180 have no horizontal overflow; the Wiki workspace scrolls correctly
+- **Phase 6 Focus Mode:** entering Focus from Wiki safely selects Write and presents the full editor
+- **Phase 6 persistence:** Write remains the launch default and the optional Mac Wiki address survives reload
+- **Phase 6 offline:** the Phase 6 shell and all seven tool tabs restored with the preview server stopped and no app warnings or errors
+- **Phase 6 cache boundary:** canon packages are absent from the app shell and explicitly excluded from runtime caching
+- **Current production `main`:** `e90b012`; Phase 5
+- **Phase 6 study branch:** `feature/phase-6-canon-search-study`
 
 ## Phase 2 iPad acceptance
 
@@ -170,14 +194,45 @@ No Phase 6 implementation is approved. The next task is Phase 5 deployment and p
 
 ## Phase 5 iPad acceptance checklist
 
+- [x] Existing draft, metrics, atmosphere, private images/content, and music remain intact.
+- [x] Write is active whenever the app launches or reloads.
+- [x] Switching to every tool preserves and locally saves the current draft.
+- [x] Images and Music move to their existing modules.
+- [x] Wiki, Motifs, Timeline, and Notebook each show the correct launcher.
+- [x] A valid `http` or `https` address changes the launcher to **Ready** and persists.
+- [x] Open actions launch separately without replacing or losing the draft on iPad.
+- [x] Notebook prepared-question editing and **Copy Question** work and persist.
+- [x] Landscape and portrait remain usable with launcher details expanded.
+- [x] Focus Mode hides the Tool Center and retains the full-screen editor.
+- [x] Airplane Mode restores the Tool Center, draft, and stored launcher configuration.
+
+**Acceptance recorded:** 2026-07-19. The user reported that Phase 5 worked as intended across the complete iPad test sequence.
+
+## Phase 6 architecture gate
+
+- [x] Compare external Streamlit, device-local browser index, and private authenticated backend.
+- [x] Document privacy, hosting, offline behavior, performance, complexity, cost, exposure risk, and migration effort.
+- [x] Confirm chronology and track-title preservation paths.
+- [x] Define a basic-search path that uses no AI API.
+- [x] Document preserved and deferred existing Wiki behavior.
+- [x] User explicitly approves Strategy B and the read-only prototype scope.
+- [x] Prototype work begins only after that approval is recorded.
+- [ ] Synthetic, responsive, persistence, privacy, and offline validation passes.
+- [ ] Physical-iPad acceptance passes with a privately transferred canon package.
+
+## Phase 6 iPad acceptance checklist
+
 - [ ] Existing draft, metrics, atmosphere, private images/content, and music remain intact.
-- [ ] Write is active whenever the app launches or reloads.
-- [ ] Switching to every tool preserves and locally saves the current draft.
-- [ ] Images and Music move to their existing modules.
-- [ ] Wiki, Motifs, Timeline, and Notebook each show the correct launcher.
-- [ ] A valid `http` or `https` address changes the launcher to **Ready** and persists.
-- [ ] Open actions launch separately without replacing or losing the draft on iPad.
-- [ ] Notebook prepared-question editing and **Copy Question** work and persist.
-- [ ] Landscape and portrait remain usable with launcher details expanded.
-- [ ] Focus Mode hides the Tool Center and retains the full-screen editor.
-- [ ] Airplane Mode restores the Tool Center, draft, and stored launcher configuration.
+- [ ] Write remains selected after launch or reload.
+- [ ] Wiki shows the private canon-search workspace and no archive is bundled automatically.
+- [ ] The private `.dreamspeak-canon.json` package imports from Files and shows 4,644 passages.
+- [ ] A one-word search returns chronological results with retained track/chapter titles.
+- [ ] A quoted-phrase search requires the complete phrase.
+- [ ] Previous/current/next context opens beneath a result.
+- [ ] Closing and reopening the app preserves the archive and search still works.
+- [ ] Airplane Mode relaunches and searches the imported archive.
+- [ ] Focus Mode entered from Wiki safely returns to the full Quiet Draft editor.
+- [ ] Replacing the package works; canceling a file choice leaves the current archive intact.
+- [ ] Remove Local Archive clears only the browser copy and disables search.
+
+**Acceptance pending.**

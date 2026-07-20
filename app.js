@@ -15,11 +15,15 @@
   const MUSIC_STATE_KEY = "dreamspeak.music-player.v1";
   const WRITING_METRICS_KEY = "dreamspeak.writing-metrics.v1";
   const TOOL_CENTER_KEY = "dreamspeak.tool-center.v1";
+  const CANON_DATABASE = "dreamspeak-canon";
+  const CANON_CHUNK_STORE = "chunks";
+  const CANON_META_STORE = "meta";
+  const MAX_CANON_FILE_SIZE = 25 * 1024 * 1024;
   const AUTOSAVE_DELAY = 650;
   const DEFAULT_PREPARED_QUESTION = "Based only on the sources in this notebook, what canon details are most relevant to the scene I am drafting?";
   const TOOL_REGISTRY = [
     { id: "write", label: "Write", type: "internal", target: "editor", note: "your local draft remains the default workspace." },
-    { id: "wiki", label: "Wiki", type: "external", title: "Dreamspeak Wiki", kind: "Private archive launcher", note: "open the separately hosted or locally served Wiki.", description: "Add the private Wiki address used on this device. The manuscript and Wiki data are never bundled into this public app.", actionLabel: "Open Wiki" },
+    { id: "wiki", label: "Wiki", type: "canon", title: "Dreamspeak Canon Search", note: "search a private read-only archive stored on this device." },
     { id: "motif", label: "Motifs", type: "external", title: "Motif Report", kind: "Prepared launcher", note: "keep a destination ready for future motif work.", description: "Add a report address when one is available. Phase 5 provides the launcher only; it does not analyze or upload the manuscript.", actionLabel: "Open Motif Report" },
     { id: "timeline", label: "Timeline", type: "external", title: "Timeline", kind: "Placeholder launcher", note: "reserve a safe path to a future timeline.", description: "Add a timeline address when one is available. Timeline exploration itself remains a future, separately scoped tool.", actionLabel: "Open Timeline" },
     { id: "images", label: "Images", type: "internal", target: "images", note: "move to the private image library already on this device." },
@@ -94,6 +98,18 @@
     toolPrimaryAction: document.querySelector("#tool-primary-action"),
     toolCopyQuestion: document.querySelector("#tool-copy-question"),
     editorModule: document.querySelector(".editor-module"),
+    canonWorkspace: document.querySelector("#canon-workspace"),
+    canonArchiveUpload: document.querySelector("#canon-archive-upload"),
+    canonImportLabel: document.querySelector("#canon-import-label"),
+    canonRemoveArchive: document.querySelector("#canon-remove-archive"),
+    canonArchiveStatus: document.querySelector("#canon-archive-status"),
+    canonSearchForm: document.querySelector("#canon-search-form"),
+    canonSearchInput: document.querySelector("#canon-search-input"),
+    canonSearchButton: document.querySelector("#canon-search-button"),
+    canonResultsStatus: document.querySelector("#canon-results-status"),
+    canonResults: document.querySelector("#canon-results"),
+    canonWikiUrl: document.querySelector("#canon-wiki-url"),
+    canonOpenWiki: document.querySelector("#canon-open-wiki"),
     imageCard: document.querySelector(".image-card"),
     musicCard: document.querySelector(".music-card"),
     toast: document.querySelector("#toast"),
@@ -189,6 +205,9 @@
   let sessionWordDelta = 0;
   let observedWordCount = 0;
   let activeToolId = "write";
+  let canonDatabasePromise = null;
+  let canonChunks = [];
+  let canonMetadata = null;
   let toolSettings = {
     urls: { wiki: "", motif: "", timeline: "", notebook: "" },
     preparedQuestion: DEFAULT_PREPARED_QUESTION
@@ -252,8 +271,16 @@
     noteLabel.textContent = `${tool.label}:`;
     elements.toolNote.append(noteLabel, ` ${tool.note}`);
 
+    const canon = tool.type === "canon";
+    elements.canonWorkspace.hidden = !canon;
+    elements.editorModule.hidden = canon;
     const external = tool.type === "external";
     elements.toolDetail.hidden = !external;
+    if (canon) {
+      elements.canonWikiUrl.value = toolSettings.urls.wiki || "";
+      renderCanonArchiveState();
+      return;
+    }
     if (!external) return;
 
     const configured = Boolean(safeToolUrl(toolSettings.urls[tool.id]));
@@ -325,6 +352,21 @@
     showToast(`Opening ${tool.label} in a new tab`);
   }
 
+  function openProtectedUrl(value, label) {
+    const url = safeToolUrl(value);
+    if (!url) return false;
+    saveDraft();
+    const link = document.createElement("a");
+    link.href = url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    showToast(`Opening ${label} in a new tab`);
+    return true;
+  }
+
   async function copyPreparedQuestion() {
     const text = toolSettings.preparedQuestion.trim();
     if (!text) {
@@ -346,6 +388,212 @@
       const copied = document.execCommand("copy");
       helper.remove();
       showToast(copied ? "Prepared question copied" : "Select the question and copy manually");
+    }
+  }
+
+  function openCanonDatabase() {
+    if (canonDatabasePromise) return canonDatabasePromise;
+    canonDatabasePromise = new Promise((resolve, reject) => {
+      const request = indexedDB.open(CANON_DATABASE, 1);
+      request.onupgradeneeded = () => {
+        const database = request.result;
+        if (!database.objectStoreNames.contains(CANON_CHUNK_STORE)) {
+          database.createObjectStore(CANON_CHUNK_STORE, { keyPath: "chunkNumber" });
+        }
+        if (!database.objectStoreNames.contains(CANON_META_STORE)) {
+          database.createObjectStore(CANON_META_STORE, { keyPath: "id" });
+        }
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    return canonDatabasePromise;
+  }
+
+  async function loadCanonArchive() {
+    try {
+      const database = await openCanonDatabase();
+      const transaction = database.transaction([CANON_CHUNK_STORE, CANON_META_STORE], "readonly");
+      const chunksRequest = transaction.objectStore(CANON_CHUNK_STORE).getAll();
+      const metaRequest = transaction.objectStore(CANON_META_STORE).get("archive");
+      const [chunks, metadata] = await Promise.all([
+        new Promise((resolve, reject) => {
+          chunksRequest.onsuccess = () => resolve(chunksRequest.result || []);
+          chunksRequest.onerror = () => reject(chunksRequest.error);
+        }),
+        new Promise((resolve, reject) => {
+          metaRequest.onsuccess = () => resolve(metaRequest.result || null);
+          metaRequest.onerror = () => reject(metaRequest.error);
+        })
+      ]);
+      canonChunks = chunks.sort((a, b) => a.chunkNumber - b.chunkNumber);
+      canonMetadata = metadata;
+    } catch (error) {
+      canonChunks = [];
+      canonMetadata = null;
+    }
+    renderCanonArchiveState();
+  }
+
+  function canonDate(value) {
+    const date = new Date(value);
+    if (!Number.isFinite(date.getTime())) return "unknown date";
+    return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(date);
+  }
+
+  function renderCanonArchiveState() {
+    if (!elements.canonArchiveStatus) return;
+    const ready = Boolean(canonMetadata && canonChunks.length);
+    elements.canonArchiveUpload.value = "";
+    elements.canonRemoveArchive.disabled = !ready;
+    elements.canonSearchInput.disabled = !ready;
+    elements.canonSearchButton.disabled = !ready;
+    elements.canonImportLabel.textContent = ready ? "Replace Canon Archive" : "Import Canon Archive";
+    elements.canonArchiveStatus.textContent = ready
+      ? `${canonMetadata.archiveTitle} · ${canonChunks.length.toLocaleString()} passages · exported ${canonDate(canonMetadata.generatedAt)}`
+      : "No canon archive is stored on this device.";
+    if (!ready) {
+      elements.canonResults.replaceChildren();
+      elements.canonResultsStatus.textContent = "Import a private canon archive to begin.";
+    }
+  }
+
+  async function replaceCanonArchive(archive) {
+    const database = await openCanonDatabase();
+    await new Promise((resolve, reject) => {
+      const transaction = database.transaction([CANON_CHUNK_STORE, CANON_META_STORE], "readwrite");
+      const chunkStore = transaction.objectStore(CANON_CHUNK_STORE);
+      const metaStore = transaction.objectStore(CANON_META_STORE);
+      chunkStore.clear();
+      metaStore.clear();
+      for (const chunk of archive.chunks) chunkStore.put(chunk);
+      metaStore.put({
+        id: "archive",
+        schemaVersion: archive.schemaVersion,
+        archiveTitle: archive.archiveTitle,
+        generatedAt: archive.generatedAt,
+        chunkCount: archive.chunkCount,
+        importedAt: new Date().toISOString()
+      });
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(transaction.error || new Error("Import was interrupted."));
+    });
+    canonChunks = archive.chunks;
+    canonMetadata = {
+      archiveTitle: archive.archiveTitle,
+      generatedAt: archive.generatedAt,
+      chunkCount: archive.chunkCount
+    };
+  }
+
+  async function importCanonArchive(event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+    if (file.size > MAX_CANON_FILE_SIZE) {
+      showToast("That canon archive is larger than 25 MB");
+      event.target.value = "";
+      return;
+    }
+    try {
+      const parsed = JSON.parse(await file.text());
+      const archive = window.QuietDraftCanon.validatePackage(parsed);
+      await replaceCanonArchive(archive);
+      if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+      renderCanonArchiveState();
+      elements.canonSearchInput.focus();
+      showToast(`${archive.chunkCount.toLocaleString()} canon passages stored on this device`);
+    } catch (error) {
+      showToast(error && error.message ? error.message : "That canon archive could not be imported");
+    } finally {
+      event.target.value = "";
+    }
+  }
+
+  async function removeCanonArchive() {
+    if (!canonMetadata || !window.confirm("Remove the imported canon archive from this browser? Your original file will not be changed.")) return;
+    try {
+      const database = await openCanonDatabase();
+      await new Promise((resolve, reject) => {
+        const transaction = database.transaction([CANON_CHUNK_STORE, CANON_META_STORE], "readwrite");
+        transaction.objectStore(CANON_CHUNK_STORE).clear();
+        transaction.objectStore(CANON_META_STORE).clear();
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = () => reject(transaction.error);
+      });
+      canonChunks = [];
+      canonMetadata = null;
+      elements.canonSearchInput.value = "";
+      renderCanonArchiveState();
+      showToast("Local canon archive removed");
+    } catch (error) {
+      showToast("The local canon archive could not be removed");
+    }
+  }
+
+  function appendCanonPassage(container, label, chunk) {
+    const section = document.createElement("section");
+    section.className = "canon-context-passage";
+    const heading = document.createElement("h5");
+    heading.textContent = `${label} · ${chunk.title || `Passage ${chunk.chunkNumber}`}`;
+    const copy = document.createElement("p");
+    copy.textContent = chunk.text;
+    section.append(heading, copy);
+    container.append(section);
+  }
+
+  function renderCanonResults(search) {
+    elements.canonResults.replaceChildren();
+    if (!search.terms.length) {
+      elements.canonResultsStatus.textContent = "Enter at least one word or quoted phrase.";
+      return;
+    }
+    if (!search.total) {
+      elements.canonResultsStatus.textContent = "No matching canon passages.";
+      return;
+    }
+    const shown = search.results.length;
+    elements.canonResultsStatus.textContent = search.total > shown
+      ? `${search.total.toLocaleString()} matches · showing the first ${shown} in manuscript order`
+      : `${search.total.toLocaleString()} match${search.total === 1 ? "" : "es"} · manuscript order`;
+
+    for (const result of search.results) {
+      const card = document.createElement("article");
+      card.className = "canon-result-card";
+      const meta = document.createElement("span");
+      meta.className = "canon-result-number";
+      meta.textContent = `Passage ${result.chunkNumber.toLocaleString()}`;
+      const title = document.createElement("h4");
+      title.textContent = result.title || `Passage ${result.chunkNumber}`;
+      const snippet = document.createElement("p");
+      snippet.className = "canon-snippet";
+      snippet.textContent = result.snippet;
+      const details = document.createElement("details");
+      details.className = "canon-context";
+      const summary = document.createElement("summary");
+      summary.textContent = "Previous · current · next context";
+      details.append(summary);
+      const index = canonChunks.findIndex((chunk) => chunk.chunkNumber === result.chunkNumber);
+      if (index > 0) appendCanonPassage(details, "Previous", canonChunks[index - 1]);
+      appendCanonPassage(details, "Current", canonChunks[index]);
+      if (index < canonChunks.length - 1) appendCanonPassage(details, "Next", canonChunks[index + 1]);
+      card.append(meta, title, snippet, details);
+      elements.canonResults.append(card);
+    }
+  }
+
+  function searchCanonArchive(event) {
+    event.preventDefault();
+    if (!canonChunks.length) return;
+    const result = window.QuietDraftCanon.search(canonChunks, elements.canonSearchInput.value, 50);
+    renderCanonResults(result);
+  }
+
+  function openMacWiki() {
+    const value = elements.canonWikiUrl.value;
+    if (!openProtectedUrl(value, "Mac Wiki")) {
+      elements.canonWikiUrl.focus();
+      showToast("Enter a complete http or https address first");
     }
   }
 
@@ -1882,6 +2130,9 @@
   }
 
   function setFocusMode(enabled) {
+    if (enabled && activeToolId !== "write") {
+      selectTool("write");
+    }
     document.body.classList.toggle("focus-mode", enabled);
     elements.focusToggle.setAttribute("aria-label", enabled ? "Exit focus mode" : "Enter focus mode");
     if (enabled) elements.body.focus();
@@ -1946,6 +2197,14 @@
   });
   elements.toolPrimaryAction.addEventListener("click", openActiveTool);
   elements.toolCopyQuestion.addEventListener("click", copyPreparedQuestion);
+  elements.canonArchiveUpload.addEventListener("change", importCanonArchive);
+  elements.canonRemoveArchive.addEventListener("click", removeCanonArchive);
+  elements.canonSearchForm.addEventListener("submit", searchCanonArchive);
+  elements.canonWikiUrl.addEventListener("input", () => {
+    toolSettings.urls.wiki = elements.canonWikiUrl.value.slice(0, 2000);
+    saveToolSettings();
+  });
+  elements.canonOpenWiki.addEventListener("click", openMacWiki);
   elements.newDraft.addEventListener("click", newDraft);
   elements.saveDraft.addEventListener("click", () => saveDraft({ announce: true }));
   elements.exportDraft.addEventListener("click", exportDraft);
@@ -2079,13 +2338,14 @@
   loadMusicLibrary({ restorePosition: true });
   loadDraft();
   initializeToolCenter();
+  loadCanonArchive();
   initializeWritingMetrics();
   updateCounts();
   resizeEditor();
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260719-8")
+      navigator.serviceWorker.register("./service-worker.js?v=20260719-9")
         .then((registration) => registration.update())
         .catch((error) => {
           if (!navigator.serviceWorker.controller) {

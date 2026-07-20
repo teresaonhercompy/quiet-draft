@@ -229,11 +229,36 @@ The Highlights strip contains editable **Current project**, **Scene / chapter**,
 
 Metrics stay only on this device. They do not scan Scrivener, synchronize between Mac and iPad, include changes made outside Quiet Draft, or serve as a permanent writing ledger. Export remains the safety copy for important prose.
 
-## 10. Configure and use the Tool Center
+## 10. Import and search the private canon archive
+
+The manuscript archive is never hosted with the app. Create and transfer it privately:
+
+1. On the Mac, open Terminal and change into the Quiet Draft project folder.
+2. Run the exporter with the actual database and private destination paths:
+
+   ```bash
+   python3 tools/export_canon_archive.py \
+     --database "/path/to/dreamspeak.sqlite" \
+     --output "/path/to/Dreamspeak.dreamspeak-canon.json"
+   ```
+
+3. AirDrop the resulting `.dreamspeak-canon.json` file to the iPad, or place it in a Files location you control.
+4. Open Dreamspeak and tap **Wiki**.
+5. Tap **Import Canon Archive**, choose the file, and wait for its title and passage count to appear.
+6. Search for ordinary words or put a phrase in straight quotation marks, such as `"exact phrase"`.
+7. Results remain in manuscript order. Open **Previous · current · next context** beneath a result to read its neighbors.
+
+The imported copy stays in a separate private browser database on this iPad and remains available offline. **Replace Canon Archive** installs a newer package atomically. **Remove Local Archive** erases only the imported browser copy, not the file in Files or the source database on the Mac.
+
+Keep the source database and exported package as backups. Safari storage is not a permanent archive and may be removed if website data is cleared or the device is under storage pressure. Never commit the generated package to GitHub; the repository ignores the expected private filename pattern.
+
+Notes and motif-report editing remain in the authoritative Mac Wiki. Expand **Open the authoritative Mac Wiki** in the Wiki workspace if you want to preserve its reachable address on this device.
+
+## 11. Configure and use the rest of the Tool Center
 
 **Write** is the default each time Dreamspeak opens. Tap **Images** or **Music** to move to the corresponding local module. Switching tools saves the current draft first.
 
-The **Wiki**, **Motifs**, **Timeline**, and **Notebook** tabs are safe launchers:
+The **Motifs**, **Timeline**, and **Notebook** tabs are safe launchers:
 
 1. Tap the tool.
 2. Paste its complete `https://` or `http://` address into **Web address**.
@@ -242,9 +267,9 @@ The **Wiki**, **Motifs**, **Timeline**, and **Notebook** tabs are safe launchers
 
 For **Notebook**, edit the prepared question and tap **Copy Question** before opening the notebook. The app copies only that question; it never copies or sends the draft automatically.
 
-Addresses and the prepared question stay in Safari storage on this iPad. They do not sync to the Mac. A GitHub Pages app cannot directly open arbitrary documents from the Files app, so leave the Wiki launcher unconfigured until the Wiki is available through an approved address. NotebookLM is opened as a normal external webpage; Dreamspeak does not sign in, embed it, scrape it, or automate it.
+Addresses and the prepared question stay in Safari storage on this iPad. They do not sync to the Mac. NotebookLM is opened as a normal external webpage; Dreamspeak does not sign in, embed it, scrape it, or automate it.
 
-## 11. Test offline use
+## 12. Test offline use
 
 1. While still online, launch Quiet Draft from the Home Screen.
 2. Select every repository-hosted background you expect to use offline at least once. This lets the service worker cache the image.
@@ -261,11 +286,12 @@ Addresses and the prepared question stay in Safari storage on this iPad. They do
    - Previous/next, seek, volume, shuffle, and repeat work.
    - A private background can be selected.
    - A private typing sound plays.
+   - The Wiki search returns the same local results without a connection.
 7. Turn Airplane Mode off after the test.
 
 Locally imported backgrounds and sounds are already on the iPad and do not need a network connection. Repository-hosted backgrounds should be selected once online before relying on them during travel.
 
-## 12. Add a public background to every installation
+## 13. Add a public background to every installation
 
 Use this method only for images you are comfortable making public. Any image committed to the public GitHub repository can be viewed or downloaded by other people.
 
@@ -287,7 +313,7 @@ The deployment automatically rebuilds `backgrounds/backgrounds.json`, so image f
 
 Do not commit personal typing sounds to this repository. The project’s `.gitignore` intentionally excludes common audio formats, and Quiet Draft’s private sound importer is the supported Version 1 workflow.
 
-## 13. Backups, updates, and data safety
+## 14. Backups, updates, and data safety
 
 ### Back up writing
 
