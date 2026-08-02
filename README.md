@@ -15,6 +15,7 @@ There is no login, cloud sync, AI, analytics, or external service. Draft text is
 - Private local discography with albums, tracks, artwork, seek, volume, shuffle, and repeat
 - Remembered music selection and playback position without autoplay
 - System and Magic Keyboard play, pause, previous, and next controls when the iPad browser exposes them
+- Expandable private Music Theater with local MP4 playback, posters, saved position, and full screen
 - Current project, draft, and scene/chapter highlights
 - Session words, today’s net words, last autosave, last export, and manual manuscript total
 - Data-driven Tool Center for Write, Wiki, Motifs, Timeline, Images, Music, and Notebook
@@ -154,6 +155,14 @@ Transfer the resulting file directly through AirDrop or Files, import it from th
 
 Launcher settings and the prepared Notebook question use the additive local-only `dreamspeak.tool-center.v1` record. External destinations open with new-tab and opener protections. Quiet Draft does not embed external pages, authenticate to them, send draft or canon text, scrape NotebookLM, or automate a Google browser session.
 
+## Private Music Theater
+
+Choose **Theater** in the Tool Center, then select **Add Videos**. Music Theater accepts one or several H.264/AAC `.mp4` files from Files and appends them to the existing library. Adding a future video never replaces the films already stored.
+
+Each video receives a filename-derived title that can be edited locally. You can add or change a separate poster image, save an optional HTTPS YouTube or youtu.be fallback, enter native full screen, and remove an individual browser copy. The selected video and approximate position are remembered, but playback never starts automatically and pauses whenever the app leaves the foreground.
+
+Videos, metadata, and posters are stored in the separate `dreamspeak-theater` IndexedDB database on the current device. They are never committed, uploaded, fetched automatically, or placed in the service-worker cache. Keep every original video and poster in Files or on the Mac because clearing website data or browser storage pressure can remove local browser copies.
+
 ## Optional local background images
 
 Quiet Draft includes CSS fallback art, so no image files are required. It now discovers any `.jpg`, `.jpeg`, `.png`, `.webp`, `.gif`, or `.avif` file inside the `backgrounds` folder when the web host exposes a directory listing. Discovered files appear under **Backgrounds Folder** in the Scene menu. Use **Refresh folder** after adding files.
@@ -182,6 +191,7 @@ The **Dark Glass** editor appearance uses white text on a translucent charcoal p
 - `styles.css` — responsive light, dark, and focus-mode design
 - `app.js` — writing, local saving, counts, copy, and export behavior
 - `media-session.js` — capability-detected system media-control bridge
+- `theater-core.js` — local video validation, titles, state, and YouTube-link rules
 - `canon-core.js` — package validation and private in-browser search
 - `tools/export_canon_archive.py` — generic Mac exporter; generated packages are private and ignored by Git
 - `manifest.webmanifest` — install settings

@@ -232,3 +232,15 @@
 **Alternatives considered:** Add global keyboard shortcuts; intercept ordinary key events; require full Media Session support; allow background playback; replace the visible music controls.
 
 **Consequences:** Supported keyboard or system controls operate the same local audio player. Unsupported actions fail silently. Phase 7A adds no storage migration, autoplay, cloud service, external dependency, or writing-key interception. Foreground state is authoritative: hiding or dismissing the app pauses audio and suspends the system session; returning reinstalls it without resuming playback. Physical behavior still requires acceptance on the confirmed iPadOS device.
+
+## DCC-021 — Phase 7C uses an expandable device-local video library
+
+**Date:** 2026-08-02
+
+**Decision:** Store explicitly imported MP4 files, lightweight editable metadata, and per-video posters in separate object stores inside a new `dreamspeak-theater` IndexedDB database. Keep a persistent Add Videos action so future films append without replacing existing entries or requiring code changes. Remember selection and approximate positions under `dreamspeak.music-theater.v1`, but never autoplay.
+
+**Reason:** The optimized initial library is small relative to available iPad storage, while future Dreamspeak videos need the same private offline workflow. Separating blobs from metadata avoids rewriting large files when titles or fallback links change.
+
+**Alternatives considered:** Hard-code two films; commit videos to GitHub; place videos in the service-worker cache; use YouTube as the primary source; replace the entire library on every import; store titles and position inside each large blob record.
+
+**Consequences:** Videos and posters remain private to each browser installation and require explicit import on every device. New videos append through the UI. Browser copies can be removed individually, playback pauses outside the foreground, and YouTube remains an optional validated online fallback. Originals remain the backup because clearing website data or storage pressure can remove IndexedDB content.
