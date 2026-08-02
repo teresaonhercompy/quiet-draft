@@ -4,13 +4,11 @@
 
 **Current phase:** Phase 7A — Hardware Media Controls
 
-**Phase state:** Phase 7A approved and implemented as an iPad test candidate; Phase 7B held; Phase 7C scoped but not approved
+**Phase state:** Phase 7A accepted on the physical iPad; Phase 7B held; Phase 7C scoped but not approved
 
-**Current production version:** Dreamspeak Command Center Phase 6 / service-worker cache `20260719-9`
+**Current production version:** Dreamspeak Command Center Phase 7A / service-worker cache `20260802-2`
 
-**Current production commit:** `a317dd7`
-
-**Phase 7A corrected test candidate:** service-worker cache `20260802-2`
+**Current production commit:** `cdf8f3c`
 
 **Production:** <https://teresaonhercompy.github.io/quiet-draft/>
 
@@ -96,14 +94,18 @@
 - Confirmed that local data and local draft saving remained reliable during that period.
 - Confirmed the practical export path from iPad to Notes and onward to Scrivener on the Mac.
 
-## In-progress work
+### Phase 7A — Hardware Media Controls
 
-- Validate Phase 7A system media controls on the confirmed iPad Air 11-inch (M4), Magic Keyboard `MDFV4LL/A`, and iPadOS 26.5.2 acceptance device.
 - Phase 7A registers capability-detected play, pause, previous-track, and next-track actions against the existing local player.
 - Current local title, artist, album, artwork, playback state, and position are published to the system media surface when supported.
 - Existing visible controls remain the fallback; no autoplay, storage migration, writing-key interception, or background-playback change was introduced.
 - Physical testing passed steps 1–8, including Focus Mode and system controls, but cache `20260802-1` continued playing after the standalone app was shut down.
-- Candidate `20260802-2` makes foreground state authoritative, suspends Media Session handlers and metadata when hidden or dismissed, rejects background play/track actions, and reinstalls the session without autoplay when the app returns.
+- Cache `20260802-2` made foreground state authoritative, suspended Media Session handlers and metadata when hidden or dismissed, rejected background play/track actions, and reinstated the session without autoplay when the app returned.
+- Merged pull requests #12 and #13 and deployed service-worker cache `20260802-2`.
+- Received complete physical-iPad acceptance on 2026-08-02: system controls, Focus Mode writing, metadata, local saving, Home Screen backgrounding, app-switcher dismissal, paused-position restoration, and offline behavior worked as required.
+
+## In-progress work
+
 - Phase 7B is explicitly held by user request and must not be implemented unless reopened.
 - Phase 7C is scoped but not approved. Both videos are confirmed H.264/AAC `.mp4` files totaling approximately 1.1 GB; **Music Theater**, local-first playback, and manually selected poster images are confirmed.
 - Phase 8 remains optional and unapproved; none of the current media enhancements requires it.
@@ -119,7 +121,7 @@
 
 ## Next approved task
 
-Deploy the Phase 7A candidate and run the physical iPad media-control and regression test. Do not begin Phase 7B or Phase 7C.
+No further Phase 7 implementation is approved. Phase 7B remains held. Phase 7C requires explicit approval and an iPad free-space check before implementation.
 
 ## Last tested production baseline
 
@@ -149,7 +151,7 @@ Deploy the Phase 7A candidate and run the physical iPad media-control and regres
 - **Launcher configuration:** Wiki address changed to Ready, opened through a protected external-link action, and persisted across reload
 - **Prepared question:** edited text copied exactly to the clipboard and persisted across offline relaunch
 
-## Phase 7A candidate validation
+## Phase 7A acceptance
 
 - **Media Session unit test:** partial action support, play/pause/next callbacks, metadata, artwork, playback state, position, clearing, and unsupported-browser fallback passed.
 - **Existing canon regression test:** passed unchanged.
@@ -161,7 +163,10 @@ Deploy the Phase 7A candidate and run the physical iPad media-control and regres
 - **Offline relaunch:** Phase 7A shell, saved draft, and music module restored with the local server stopped.
 - **Console:** no app-specific warnings or errors.
 - **First physical pass:** steps 1–8 passed; closing the app did not stop audio, so acceptance was withheld.
-- **Remaining physical acceptance:** verify the corrected `20260802-2` candidate still passes system/Magic Keyboard controls and now stops audio when the app is backgrounded or shut down.
+- **Corrected physical pass:** all steps passed on the confirmed iPad and Magic Keyboard.
+- **Foreground-only playback:** audio stopped on return to the Home Screen and after app-switcher dismissal.
+- **Return behavior:** relaunch restored the selected track near its saved position but remained paused.
+- **Acceptance recorded:** 2026-08-02 for service-worker cache `20260802-2`, production commit `cdf8f3c`.
 - **Internal tools:** Images remained aligned at the top of the landscape media rail; Music scrolled that rail to its complete card while preserving the active state
 - **Phase 5 landscape:** 1180×820, no horizontal/page overflow; all seven tabs fit; expanded Notebook panel leaves a 316px editor and Focus Mode restores 820px
 - **Phase 5 portrait:** 820×1180, no horizontal overflow; editor remains ahead of supporting modules and normal page scrolling reaches them
