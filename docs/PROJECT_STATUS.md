@@ -2,7 +2,7 @@
 
 **Updated:** 2026-08-02
 
-**Current phase:** Phase 7A — Hardware Media Controls
+**Current phase:** Phase 7C — Music Theater Ready for Approval
 
 **Phase state:** Phase 7A accepted on the physical iPad; Phase 7B held; Phase 7C scoped but not approved
 
@@ -107,7 +107,9 @@
 ## In-progress work
 
 - Phase 7B is explicitly held by user request and must not be implemented unless reopened.
-- Phase 7C is scoped but not approved. Both videos are confirmed H.264/AAC `.mp4` files totaling approximately 1.1 GB; **Music Theater**, local-first playback, and manually selected poster images are confirmed.
+- Phase 7C is fully scoped but not approved. The two initial H.264/AAC `.mp4` files have been optimized to approximately 100 MB each, and the iPad has approximately 93 GB available.
+- **Music Theater**, local-first playback, manually selected per-video posters, and an expandable additive library for future videos are confirmed.
+- Future videos must be importable through a persistent **Add Videos** action without replacing existing entries or requiring code changes.
 - Phase 8 remains optional and unapproved; none of the current media enhancements requires it.
 
 ## Known observations
@@ -121,7 +123,7 @@
 
 ## Next approved task
 
-No further Phase 7 implementation is approved. Phase 7B remains held. Phase 7C requires explicit approval and an iPad free-space check before implementation.
+No further Phase 7 implementation is approved. Phase 7B remains held. Phase 7C has cleared its storage and format questions and is ready for explicit implementation approval.
 
 ## Last tested production baseline
 
