@@ -61,8 +61,19 @@ controller.clear();
 assert.equal(mediaSession.metadata, null);
 assert.equal(mediaSession.playbackState, "none");
 
+controller.install();
+controller.setMetadata({ title: "Suspended Track" });
+controller.suspend();
+assert.equal(mediaSession.metadata, null);
+assert.equal(mediaSession.playbackState, "none");
+assert.equal(handlers.play, null);
+assert.equal(handlers.pause, null);
+assert.equal(handlers.nexttrack, null);
+assert.deepEqual(positions[positions.length - 1], undefined);
+
 const unsupported = createMediaSessionController({});
 assert.equal(unsupported.supported, false);
 assert.deepEqual(unsupported.install(), []);
+unsupported.suspend();
 
 console.log("Media Session tests passed");
