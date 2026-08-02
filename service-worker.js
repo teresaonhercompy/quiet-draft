@@ -1,10 +1,11 @@
-const VERSION = "20260719-9";
+const VERSION = "20260802-1";
 const CACHE_NAME = `quiet-draft-${VERSION}`;
 const APP_SHELL = [
   "./",
   `./index.html?v=${VERSION}`,
   `./styles.css?v=${VERSION}`,
   `./music-metadata.js?v=${VERSION}`,
+  `./media-session.js?v=${VERSION}`,
   `./canon-core.js?v=${VERSION}`,
   `./app.js?v=${VERSION}`,
   `./manifest.webmanifest?v=${VERSION}`,
