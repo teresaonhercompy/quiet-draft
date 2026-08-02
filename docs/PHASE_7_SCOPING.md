@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-02
 
-**Status:** Phase 7A approved and implemented as a test candidate; Phase 7B held by user request; Phase 7C scoped only
+**Status:** Phase 7A accepted on the physical iPad; Phase 7B held by user request; Phase 7C scoped only
 
 ## Accepted baseline
 
@@ -26,7 +26,7 @@ The three requested enhancements are technically feasible and belong in Phase 7.
 
 ## Recommended delivery order
 
-1. **Phase 7A — Hardware Media Controls:** approved and ready for physical acceptance
+1. **Phase 7A — Hardware Media Controls:** accepted and complete
 2. **Phase 7C — Dreamspeak Music Theater:** scoped for a later explicit approval
 3. **Phase 7B — Center-panel Visual Archive:** held; do not implement unless the user reopens it
 
@@ -64,7 +64,7 @@ Apple identifies the selected Magic Keyboard as having a 14-key function row. Ph
 
 ### Implementation state
 
-The Phase 7A test candidate uses a small capability-detected controller around the existing audio element. It registers each system action separately so partial browser support remains harmless, publishes local title/artist/album/artwork and position when supported, and performs no browser-storage migration. The visible player remains authoritative. No global media-key or writing-key interception was added. After the first physical pass revealed that audio could survive standalone-app dismissal, the corrected candidate suspends the Media Session and refuses background play/track actions whenever the document leaves the foreground.
+The accepted Phase 7A implementation uses a small capability-detected controller around the existing audio element. It registers each system action separately so partial browser support remains harmless, publishes local title/artist/album/artwork and position when supported, and performs no browser-storage migration. The visible player remains authoritative. No global media-key or writing-key interception was added. After the first physical pass revealed that audio could survive standalone-app dismissal, cache `20260802-2` suspended the Media Session and refused background play/track actions whenever the document left the foreground. The corrected system controls, Focus Mode behavior, Home Screen pause, app-switcher dismissal, and paused-position restoration passed physical testing on 2026-08-02.
 
 ## Phase 7B — Center-panel Visual Archive
 
@@ -171,7 +171,7 @@ None of these enhancements requires AI, a backend, authentication, or cross-devi
 
 ### Phase 7A
 
-Approved and implemented as a capability-detected test candidate. Physical acceptance on the confirmed iPad and Magic Keyboard remains required.
+Accepted on the confirmed iPad and Magic Keyboard on 2026-08-02. Phase 7A is complete.
 
 ### Phase 7B
 
