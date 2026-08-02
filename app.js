@@ -184,6 +184,7 @@
   let selectedMusicTrackId = "";
   let musicObjectUrl = null;
   let musicArtworkObjectUrl = null;
+  let musicMediaSessionController = null;
   let pendingMusicPosition = 0;
   let lastMusicStateSecond = -1;
   let musicState = {
@@ -1090,6 +1091,41 @@
     return musicTracks.find((track) => track.id === selectedMusicTrackId) || null;
   }
 
+  function initializeMusicMediaSession() {
+    if (!globalThis.QuietDraftMediaSession || !elements.musicAudio) return;
+    musicMediaSessionController = globalThis.QuietDraftMediaSession.createMediaSessionController({
+      mediaSession: navigator.mediaSession,
+      MediaMetadataCtor: globalThis.MediaMetadata,
+      audio: elements.musicAudio,
+      callbacks: {
+        play: () => playSelectedMusic(),
+        pause: () => elements.musicAudio.pause(),
+        previous: () => moveMusicTrack(-1, { continuePlayback: !elements.musicAudio.paused }),
+        next: () => moveMusicTrack(1, { continuePlayback: !elements.musicAudio.paused })
+      }
+    });
+    musicMediaSessionController.install();
+  }
+
+  function updateMusicMediaSessionMetadata() {
+    if (!musicMediaSessionController) return;
+    const track = selectedMusicTrack();
+    if (!track) {
+      musicMediaSessionController.clear();
+      return;
+    }
+    const artwork = musicArtwork.find((item) => item.id === track.albumId);
+    const artworkEntries = artwork && musicArtworkObjectUrl
+      ? [{ src: musicArtworkObjectUrl, type: artwork.type || (artwork.blob && artwork.blob.type) || "image/jpeg" }]
+      : [];
+    musicMediaSessionController.setMetadata({
+      title: track.title,
+      artist: track.artist,
+      album: track.album,
+      artwork: artworkEntries
+    });
+  }
+
   function syncMusicImportFields() {
     const album = selectedMusicAlbum();
     if (!album) return;
@@ -1211,6 +1247,7 @@
     elements.musicDuration.textContent = "0:00";
     elements.musicPlay.textContent = "▶";
     elements.musicPlay.setAttribute("aria-label", "Play");
+    if (musicMediaSessionController) musicMediaSessionController.clear();
   }
 
   function loadSelectedMusicTrack({ restorePosition = false, continuePlayback = false } = {}) {
@@ -1238,6 +1275,7 @@
     elements.musicDuration.textContent = "0:00";
     elements.musicPlay.textContent = "▶";
     elements.musicPlay.setAttribute("aria-label", "Play");
+    updateMusicMediaSessionMetadata();
     saveMusicState();
 
     if (continuePlayback) {
@@ -1299,12 +1337,18 @@
 
   function toggleMusicPlayback() {
     if (!selectedMusicTrack()) return;
-    setMusicError();
     if (elements.musicAudio.paused) {
-      elements.musicAudio.play().catch(() => setMusicError("This track could not be played. Try MP3, M4A, or WAV."));
+      playSelectedMusic();
     } else {
       elements.musicAudio.pause();
     }
+  }
+
+  function playSelectedMusic() {
+    if (!selectedMusicTrack()) return Promise.resolve();
+    setMusicError();
+    return elements.musicAudio.play()
+      .catch(() => setMusicError("This track could not be played. Try MP3, M4A, or WAV."));
   }
 
   function handleMusicEnded() {
@@ -1331,6 +1375,7 @@
       elements.musicAudio.currentTime = Math.min(pendingMusicPosition, Math.max(0, duration - 0.25));
     }
     pendingMusicPosition = 0;
+    if (musicMediaSessionController) musicMediaSessionController.syncPosition();
   }
 
   function handleMusicTimeUpdate() {
@@ -1343,6 +1388,7 @@
     if (second !== lastMusicStateSecond) {
       lastMusicStateSecond = second;
       saveMusicState();
+      if (musicMediaSessionController) musicMediaSessionController.syncPosition();
     }
   }
 
@@ -1351,6 +1397,7 @@
     if (!Number.isFinite(duration) || duration <= 0) return;
     elements.musicAudio.currentTime = (Number(elements.musicSeek.value) / 1000) * duration;
     saveMusicState();
+    if (musicMediaSessionController) musicMediaSessionController.syncPosition();
   }
 
   function toggleMusicShuffle() {
@@ -2301,10 +2348,18 @@
   elements.musicAudio.addEventListener("play", () => {
     elements.musicPlay.textContent = "❚❚";
     elements.musicPlay.setAttribute("aria-label", "Pause");
+    if (musicMediaSessionController) {
+      musicMediaSessionController.syncPlaybackState();
+      musicMediaSessionController.syncPosition();
+    }
   });
   elements.musicAudio.addEventListener("pause", () => {
     elements.musicPlay.textContent = "▶";
     elements.musicPlay.setAttribute("aria-label", "Play");
+    if (musicMediaSessionController) {
+      musicMediaSessionController.syncPlaybackState();
+      musicMediaSessionController.syncPosition();
+    }
     saveMusicState();
   });
   elements.musicAudio.addEventListener("error", () => setMusicError("This track is missing or uses an unsupported audio format."));
@@ -2327,6 +2382,7 @@
 
   loadAtmosphere();
   loadMusicState();
+  initializeMusicMediaSession();
   loadWritingMetrics();
   applyTheme(preferredTheme());
   updateConnectionStatus();
@@ -2345,7 +2401,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260719-9")
+      navigator.serviceWorker.register("./service-worker.js?v=20260802-1")
         .then((registration) => registration.update())
         .catch((error) => {
           if (!navigator.serviceWorker.controller) {

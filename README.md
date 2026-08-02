@@ -1,6 +1,6 @@
 # Dreamspeak Command Center — Quiet Draft
 
-Dreamspeak Command Center is a dark, local-first creative shell built around Quiet Draft, its distraction-free scene editor for iPad. The Phase 6 prototype adds private, read-only canon search without publishing the manuscript. It runs entirely in the browser, saves the current draft on the device, and works offline after its first successful load.
+Dreamspeak Command Center is a dark, local-first creative shell built around Quiet Draft, its distraction-free scene editor for iPad. It includes private, read-only canon search without publishing the manuscript and capability-detected system media controls for the local music player. It runs entirely in the browser, saves the current draft on the device, and works offline after its first successful load.
 
 There is no login, cloud sync, AI, analytics, or external service. Draft text is stored only in the browser's local storage. Export or copy the text when you are ready to move it into Scrivener.
 
@@ -14,6 +14,7 @@ There is no login, cloud sync, AI, analytics, or external service. Draft text is
 - Private gallery-image imports stored only on the current device
 - Private local discography with albums, tracks, artwork, seek, volume, shuffle, and repeat
 - Remembered music selection and playback position without autoplay
+- System and Magic Keyboard play, pause, previous, and next controls when the iPad browser exposes them
 - Current project, draft, and scene/chapter highlights
 - Session words, today’s net words, last autosave, last export, and manual manuscript total
 - Data-driven Tool Center for Write, Wiki, Motifs, Timeline, Images, Music, and Notebook
@@ -125,6 +126,8 @@ Open **Manage Local Library**, choose **Add Tracks**, and select audio files fro
 
 Audio, tags, and artwork are read locally and copied into IndexedDB only after an explicit import. They are not committed, uploaded, streamed, or placed in the service-worker cache. The player never starts automatically and pauses when the app leaves the foreground. It remembers the selected track, approximate position, volume, shuffle, and repeat preferences for the next launch.
 
+When iPadOS and the installed browser expose Media Session controls, the app connects system or Magic Keyboard **Play/Pause**, **Previous**, and **Next** actions to this same local player and publishes the current track's local metadata and artwork. Support is capability-based: the visible player remains available if any hardware action is unsupported. These controls do not intercept writing keys, do not enable autoplay, and do not change the foreground-only playback rule.
+
 MP3, M4A, and WAV are the safest iPad formats. Embedded metadata is currently read from ID3-tagged MP3 files; other formats use the fallback fields and filename-derived title. Retain every original in Files, and remember that Safari may remove local website data when storage is cleared or under device pressure.
 
 ## Writing metrics and highlights
@@ -178,6 +181,7 @@ The **Dark Glass** editor appearance uses white text on a translucent charcoal p
 - `index.html` — app structure and iPad/PWA metadata
 - `styles.css` — responsive light, dark, and focus-mode design
 - `app.js` — writing, local saving, counts, copy, and export behavior
+- `media-session.js` — capability-detected system media-control bridge
 - `canon-core.js` — package validation and private in-browser search
 - `tools/export_canon_archive.py` — generic Mac exporter; generated packages are private and ignored by Git
 - `manifest.webmanifest` — install settings
@@ -189,4 +193,4 @@ No build step or package installation is required.
 
 ## Dreamspeak Command Center project documents
 
-Future phased work is governed by the [product requirements](docs/PRD.md), [current project status](docs/PROJECT_STATUS.md), [decision log](docs/DECISIONS.md), and [Phase 0 safeguard audit](docs/PHASE_0_AUDIT.md). Read all four before changing application behavior or browser storage.
+Future phased work is governed by the [product requirements](docs/PRD.md), [current project status](docs/PROJECT_STATUS.md), [decision log](docs/DECISIONS.md), [Phase 0 safeguard audit](docs/PHASE_0_AUDIT.md), and [Phase 7 media-tool scoping discussion](docs/PHASE_7_SCOPING.md). Read the relevant documents before changing application behavior or browser storage.

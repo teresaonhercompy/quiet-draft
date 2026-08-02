@@ -220,3 +220,15 @@
 **Alternatives considered:** Keep search solely in the external Streamlit Wiki; place the corpus behind a private authenticated backend; publish an obfuscated or unlisted data file.
 
 **Consequences:** Generated canon packages are excluded from Git and the service-worker cache. Imports, replacements, removals, search, snippets, and neighboring context are local. The Mac Streamlit Wiki remains authoritative for editable notes and motif reports. Each device requires its own import, and the original database/package remains the backup because Safari may evict browser data.
+
+## DCC-020 — Phase 7A adds capability-detected system media controls
+
+**Date:** 2026-08-02
+
+**Decision:** Register Media Session play, pause, previous-track, and next-track actions individually when the installed browser supports them. Publish the selected local track's title, artist, album, artwork, playback state, and position to the system media surface. Keep the existing visible player as the authoritative fallback.
+
+**Reason:** The confirmed iPad and Magic Keyboard provide system media controls that can keep music navigation available during Focus Mode. Browser support can be partial, so the bridge must enhance the accepted player without becoming a requirement for playback.
+
+**Alternatives considered:** Add global keyboard shortcuts; intercept ordinary key events; require full Media Session support; allow background playback; replace the visible music controls.
+
+**Consequences:** Supported keyboard or system controls operate the same local audio player. Unsupported actions fail silently. Phase 7A adds no storage migration, autoplay, cloud service, external dependency, or writing-key interception, and the existing pause-on-background behavior remains unchanged. Physical behavior still requires acceptance on the confirmed iPadOS device.

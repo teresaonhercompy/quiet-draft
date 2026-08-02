@@ -1,14 +1,16 @@
 # Dreamspeak Command Center — Project Status
 
-**Updated:** 2026-07-19
+**Updated:** 2026-08-02
 
-**Current phase:** Phase 6 — Canon Search Integration Study and Prototype
+**Current phase:** Phase 7A — Hardware Media Controls
 
-**Phase state:** Strategy B approved; read-only local canon-search prototype in implementation and test
+**Phase state:** Phase 7A approved and implemented as an iPad test candidate; Phase 7B held; Phase 7C scoped but not approved
 
-**Current production version:** Dreamspeak Command Center Phase 5 / service-worker cache `20260719-8`
+**Current production version:** Dreamspeak Command Center Phase 6 / service-worker cache `20260719-9`
 
-**Phase 6 candidate:** service-worker cache `20260719-9`
+**Current production commit:** `a317dd7`
+
+**Phase 7A test candidate:** service-worker cache `20260802-1`
 
 **Production:** <https://teresaonhercompy.github.io/quiet-draft/>
 
@@ -89,10 +91,20 @@
 - Preserved the authoritative Mac Wiki launcher for deferred notes and motif-report behavior.
 - Kept generated canon packages out of Git, fetches, and the service-worker cache; only synthetic search data appears in tests.
 - Generated and validated a private 4,644-passage package outside the public repository for physical-iPad acceptance.
+- Merged pull request #11 and deployed service-worker cache `20260719-9`.
+- Received physical-iPad acceptance after one week of regular use.
+- Confirmed that local data and local draft saving remained reliable during that period.
+- Confirmed the practical export path from iPad to Notes and onward to Scrivener on the Mac.
 
 ## In-progress work
 
-- Publish the locally validated Strategy B candidate and provide the physical-iPad acceptance sequence.
+- Validate Phase 7A system media controls on the confirmed iPad Air 11-inch (M4), Magic Keyboard `MDFV4LL/A`, and iPadOS 26.5.2 acceptance device.
+- Phase 7A registers capability-detected play, pause, previous-track, and next-track actions against the existing local player.
+- Current local title, artist, album, artwork, playback state, and position are published to the system media surface when supported.
+- Existing visible controls remain the fallback; no autoplay, storage migration, writing-key interception, or background-playback change was introduced.
+- Phase 7B is explicitly held by user request and must not be implemented unless reopened.
+- Phase 7C is scoped but not approved. Both videos are confirmed H.264/AAC `.mp4` files totaling approximately 1.1 GB; **Music Theater**, local-first playback, and manually selected poster images are confirmed.
+- Phase 8 remains optional and unapproved; none of the current media enhancements requires it.
 
 ## Known observations
 
@@ -105,11 +117,12 @@
 
 ## Next approved task
 
-Complete local validation of the approved Strategy B prototype, publish the candidate, and hand off a private iPad import/search test sequence.
+Deploy the Phase 7A candidate and run the physical iPad media-control and regression test. Do not begin Phase 7B or Phase 7C.
 
 ## Last tested production baseline
 
-- **Production baseline:** service-worker cache `20260719-8`
+- **Production baseline:** service-worker cache `20260719-9`; commit `a317dd7`
+- **Physical acceptance:** one week of successful iPad use reported on 2026-08-02
 - **Syntax/data validation:** passed for JavaScript and JSON
 - **Privacy:** no tracked audio; no audio in the service-worker app shell; test fixture hook removed before commit
 - **Empty library:** silent, stable, and all unavailable transport controls disabled
@@ -133,6 +146,19 @@ Complete local validation of the approved Strategy B prototype, publish the cand
 - **Draft preservation:** the exact test draft was saved before switching and survived launcher navigation, reload, and offline relaunch
 - **Launcher configuration:** Wiki address changed to Ready, opened through a protected external-link action, and persisted across reload
 - **Prepared question:** edited text copied exactly to the clipboard and persisted across offline relaunch
+
+## Phase 7A candidate validation
+
+- **Media Session unit test:** partial action support, play/pause/next callbacks, metadata, artwork, playback state, position, clearing, and unsupported-browser fallback passed.
+- **Existing canon regression test:** passed unchanged.
+- **Syntax/data validation:** JavaScript and JSON passed; patch whitespace validation passed.
+- **Cache integration:** `media-session.js` loaded under version `20260802-1` and is included in the service-worker app shell.
+- **iPad landscape simulation:** 1180×820, no horizontal overflow.
+- **iPad portrait simulation:** 820×1180, normal vertical scrolling and no horizontal overflow.
+- **Editor regression:** title/body entry, local save, Focus Mode entry/exit, and reload restoration passed.
+- **Offline relaunch:** Phase 7A shell, saved draft, and music module restored with the local server stopped.
+- **Console:** no app-specific warnings or errors.
+- **Remaining physical acceptance:** start private local music and verify system/Magic Keyboard play, pause, previous, and next behavior on the confirmed iPad while in Focus Mode.
 - **Internal tools:** Images remained aligned at the top of the landscape media rail; Music scrolled that rail to its complete card while preserving the active state
 - **Phase 5 landscape:** 1180×820, no horizontal/page overflow; all seven tabs fit; expanded Notebook panel leaves a 316px editor and Focus Mode restores 820px
 - **Phase 5 portrait:** 820×1180, no horizontal overflow; editor remains ahead of supporting modules and normal page scrolling reaches them
@@ -146,8 +172,8 @@ Complete local validation of the approved Strategy B prototype, publish the cand
 - **Phase 6 persistence:** Write remains the launch default and the optional Mac Wiki address survives reload
 - **Phase 6 offline:** the Phase 6 shell and all seven tool tabs restored with the preview server stopped and no app warnings or errors
 - **Phase 6 cache boundary:** canon packages are absent from the app shell and explicitly excluded from runtime caching
-- **Current production `main`:** `e90b012`; Phase 5
-- **Phase 6 study branch:** `feature/phase-6-canon-search-study`
+- **Current production `main`:** `a317dd7`; Phase 6
+- **Current production cache:** `20260719-9`
 
 ## Phase 2 iPad acceptance
 
@@ -217,22 +243,21 @@ Complete local validation of the approved Strategy B prototype, publish the cand
 - [x] Document preserved and deferred existing Wiki behavior.
 - [x] User explicitly approves Strategy B and the read-only prototype scope.
 - [x] Prototype work begins only after that approval is recorded.
-- [ ] Synthetic, responsive, persistence, privacy, and offline validation passes.
-- [ ] Physical-iPad acceptance passes with a privately transferred canon package.
+- [x] Synthetic, responsive, persistence, privacy, and offline validation passes.
+- [x] Physical-iPad acceptance passes with a privately transferred canon package.
 
 ## Phase 6 iPad acceptance checklist
 
-- [ ] Existing draft, metrics, atmosphere, private images/content, and music remain intact.
-- [ ] Write remains selected after launch or reload.
-- [ ] Wiki shows the private canon-search workspace and no archive is bundled automatically.
-- [ ] The private `.dreamspeak-canon.json` package imports from Files and shows 4,644 passages.
-- [ ] A one-word search returns chronological results with retained track/chapter titles.
-- [ ] A quoted-phrase search requires the complete phrase.
-- [ ] Previous/current/next context opens beneath a result.
-- [ ] Closing and reopening the app preserves the archive and search still works.
-- [ ] Airplane Mode relaunches and searches the imported archive.
-- [ ] Focus Mode entered from Wiki safely returns to the full Quiet Draft editor.
-- [ ] Replacing the package works; canceling a file choice leaves the current archive intact.
-- [ ] Remove Local Archive clears only the browser copy and disables search.
+- [x] Existing draft, metrics, atmosphere, private images/content, and music remain intact.
+- [x] Write remains selected after launch or reload.
+- [x] Wiki shows the private canon-search workspace and no archive is bundled automatically.
+- [x] The private `.dreamspeak-canon.json` package imports from Files and shows 4,644 passages.
+- [x] A one-word search returns chronological results with retained track/chapter titles.
+- [x] A quoted-phrase search requires the complete phrase.
+- [x] Previous/current/next context opens beneath a result.
+- [x] Closing and reopening the app preserves the archive and search still works.
+- [x] Airplane Mode relaunches and searches the imported archive.
+- [x] Focus Mode entered from Wiki safely returns to the full Quiet Draft editor.
+- [x] Archive-management behavior is acceptable for the Phase 6 V1.
 
-**Acceptance pending.**
+**Acceptance recorded:** 2026-08-02. The user reported that Phase 6 worked excellently during a week of regular iPad use, including reliable local data and saving. The iPad-to-Notes-to-Scrivener transfer path also worked in practice.
