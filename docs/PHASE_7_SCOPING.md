@@ -64,7 +64,7 @@ Apple identifies the selected Magic Keyboard as having a 14-key function row. Ph
 
 ### Implementation state
 
-The Phase 7A test candidate uses a small capability-detected controller around the existing audio element. It registers each system action separately so partial browser support remains harmless, publishes local title/artist/album/artwork and position when supported, and performs no browser-storage migration. The visible player remains authoritative. No global media-key or writing-key interception was added.
+The Phase 7A test candidate uses a small capability-detected controller around the existing audio element. It registers each system action separately so partial browser support remains harmless, publishes local title/artist/album/artwork and position when supported, and performs no browser-storage migration. The visible player remains authoritative. No global media-key or writing-key interception was added. After the first physical pass revealed that audio could survive standalone-app dismissal, the corrected candidate suspends the Media Session and refuses background play/track actions whenever the document leaves the foreground.
 
 ## Phase 7B — Center-panel Visual Archive
 

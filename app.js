@@ -185,6 +185,7 @@
   let musicObjectUrl = null;
   let musicArtworkObjectUrl = null;
   let musicMediaSessionController = null;
+  let appIsForeground = document.visibilityState !== "hidden";
   let pendingMusicPosition = 0;
   let lastMusicStateSecond = -1;
   let musicState = {
@@ -1100,8 +1101,12 @@
       callbacks: {
         play: () => playSelectedMusic(),
         pause: () => elements.musicAudio.pause(),
-        previous: () => moveMusicTrack(-1, { continuePlayback: !elements.musicAudio.paused }),
-        next: () => moveMusicTrack(1, { continuePlayback: !elements.musicAudio.paused })
+        previous: () => {
+          if (appIsForeground) moveMusicTrack(-1, { continuePlayback: !elements.musicAudio.paused });
+        },
+        next: () => {
+          if (appIsForeground) moveMusicTrack(1, { continuePlayback: !elements.musicAudio.paused });
+        }
       }
     });
     musicMediaSessionController.install();
@@ -1346,6 +1351,10 @@
 
   function playSelectedMusic() {
     if (!selectedMusicTrack()) return Promise.resolve();
+    if (!appIsForeground || document.visibilityState === "hidden") {
+      pauseMusicForBackground();
+      return Promise.resolve();
+    }
     setMusicError();
     return elements.musicAudio.play()
       .catch(() => setMusicError("This track could not be played. Try MP3, M4A, or WAV."));
@@ -1379,6 +1388,10 @@
   }
 
   function handleMusicTimeUpdate() {
+    if (!appIsForeground || document.visibilityState === "hidden") {
+      pauseMusicForBackground();
+      return;
+    }
     const duration = elements.musicAudio.duration;
     const current = elements.musicAudio.currentTime;
     elements.musicCurrentTime.textContent = formatMusicTime(current);
@@ -1492,7 +1505,28 @@
 
   function pauseMusicForBackground() {
     if (!elements.musicAudio.paused) elements.musicAudio.pause();
+    if (musicMediaSessionController) musicMediaSessionController.suspend();
     saveMusicState();
+  }
+
+  function restoreMusicForForeground() {
+    appIsForeground = true;
+    if (!musicMediaSessionController) return;
+    musicMediaSessionController.install();
+    updateMusicMediaSessionMetadata();
+    musicMediaSessionController.syncPlaybackState();
+    musicMediaSessionController.syncPosition();
+  }
+
+  function handleAppBackground() {
+    appIsForeground = false;
+    pauseMusicForBackground();
+    saveDraft();
+  }
+
+  function handleAppForeground() {
+    restoreMusicForForeground();
+    renderWritingMetrics();
   }
 
   async function importMusicArtwork(event) {
@@ -2367,16 +2401,13 @@
   document.addEventListener("keydown", handleKeyboard);
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") {
-      pauseMusicForBackground();
-      saveDraft();
+      handleAppBackground();
     } else {
-      renderWritingMetrics();
+      handleAppForeground();
     }
   });
-  window.addEventListener("pagehide", () => {
-    pauseMusicForBackground();
-    saveDraft();
-  });
+  window.addEventListener("pagehide", handleAppBackground);
+  window.addEventListener("pageshow", handleAppForeground);
   window.addEventListener("online", updateConnectionStatus);
   window.addEventListener("offline", updateConnectionStatus);
 
@@ -2401,7 +2432,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260802-1")
+      navigator.serviceWorker.register("./service-worker.js?v=20260802-2")
         .then((registration) => registration.update())
         .catch((error) => {
           if (!navigator.serviceWorker.controller) {

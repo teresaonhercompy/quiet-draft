@@ -10,7 +10,7 @@
 
 **Current production commit:** `a317dd7`
 
-**Phase 7A test candidate:** service-worker cache `20260802-1`
+**Phase 7A corrected test candidate:** service-worker cache `20260802-2`
 
 **Production:** <https://teresaonhercompy.github.io/quiet-draft/>
 
@@ -102,6 +102,8 @@
 - Phase 7A registers capability-detected play, pause, previous-track, and next-track actions against the existing local player.
 - Current local title, artist, album, artwork, playback state, and position are published to the system media surface when supported.
 - Existing visible controls remain the fallback; no autoplay, storage migration, writing-key interception, or background-playback change was introduced.
+- Physical testing passed steps 1–8, including Focus Mode and system controls, but cache `20260802-1` continued playing after the standalone app was shut down.
+- Candidate `20260802-2` makes foreground state authoritative, suspends Media Session handlers and metadata when hidden or dismissed, rejects background play/track actions, and reinstalls the session without autoplay when the app returns.
 - Phase 7B is explicitly held by user request and must not be implemented unless reopened.
 - Phase 7C is scoped but not approved. Both videos are confirmed H.264/AAC `.mp4` files totaling approximately 1.1 GB; **Music Theater**, local-first playback, and manually selected poster images are confirmed.
 - Phase 8 remains optional and unapproved; none of the current media enhancements requires it.
@@ -152,13 +154,14 @@ Deploy the Phase 7A candidate and run the physical iPad media-control and regres
 - **Media Session unit test:** partial action support, play/pause/next callbacks, metadata, artwork, playback state, position, clearing, and unsupported-browser fallback passed.
 - **Existing canon regression test:** passed unchanged.
 - **Syntax/data validation:** JavaScript and JSON passed; patch whitespace validation passed.
-- **Cache integration:** `media-session.js` loaded under version `20260802-1` and is included in the service-worker app shell.
+- **Cache integration:** `media-session.js` is included in the service-worker app shell; the corrected candidate uses version `20260802-2`.
 - **iPad landscape simulation:** 1180×820, no horizontal overflow.
 - **iPad portrait simulation:** 820×1180, normal vertical scrolling and no horizontal overflow.
 - **Editor regression:** title/body entry, local save, Focus Mode entry/exit, and reload restoration passed.
 - **Offline relaunch:** Phase 7A shell, saved draft, and music module restored with the local server stopped.
 - **Console:** no app-specific warnings or errors.
-- **Remaining physical acceptance:** start private local music and verify system/Magic Keyboard play, pause, previous, and next behavior on the confirmed iPad while in Focus Mode.
+- **First physical pass:** steps 1–8 passed; closing the app did not stop audio, so acceptance was withheld.
+- **Remaining physical acceptance:** verify the corrected `20260802-2` candidate still passes system/Magic Keyboard controls and now stops audio when the app is backgrounded or shut down.
 - **Internal tools:** Images remained aligned at the top of the landscape media rail; Music scrolled that rail to its complete card while preserving the active state
 - **Phase 5 landscape:** 1180×820, no horizontal/page overflow; all seven tabs fit; expanded Notebook panel leaves a 316px editor and Focus Mode restores 820px
 - **Phase 5 portrait:** 820×1180, no horizontal overflow; editor remains ahead of supporting modules and normal page scrolling reaches them

@@ -67,6 +67,29 @@
       syncPlaybackState();
     }
 
+    function suspend() {
+      active = false;
+      if (!supported) return;
+      ["play", "pause", "previoustrack", "nexttrack"].forEach((action) => {
+        try {
+          mediaSession.setActionHandler(action, null);
+        } catch (error) {
+          // Unsupported or already-cleared actions require no recovery.
+        }
+      });
+      try {
+        mediaSession.metadata = null;
+      } catch (error) {
+        // Clearing metadata is optional when an implementation rejects it.
+      }
+      try {
+        if (typeof mediaSession.setPositionState === "function") mediaSession.setPositionState();
+      } catch (error) {
+        // Clearing position state is optional and varies by browser.
+      }
+      syncPlaybackState();
+    }
+
     function syncPlaybackState() {
       if (!supported || !("playbackState" in mediaSession)) return;
       try {
@@ -89,7 +112,7 @@
       }
     }
 
-    return { supported, install, setMetadata, clear, syncPlaybackState, syncPosition };
+    return { supported, install, setMetadata, clear, suspend, syncPlaybackState, syncPosition };
   }
 
   return { createMediaSessionController };

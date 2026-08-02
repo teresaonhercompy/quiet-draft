@@ -231,4 +231,4 @@
 
 **Alternatives considered:** Add global keyboard shortcuts; intercept ordinary key events; require full Media Session support; allow background playback; replace the visible music controls.
 
-**Consequences:** Supported keyboard or system controls operate the same local audio player. Unsupported actions fail silently. Phase 7A adds no storage migration, autoplay, cloud service, external dependency, or writing-key interception, and the existing pause-on-background behavior remains unchanged. Physical behavior still requires acceptance on the confirmed iPadOS device.
+**Consequences:** Supported keyboard or system controls operate the same local audio player. Unsupported actions fail silently. Phase 7A adds no storage migration, autoplay, cloud service, external dependency, or writing-key interception. Foreground state is authoritative: hiding or dismissing the app pauses audio and suspends the system session; returning reinstalls it without resuming playback. Physical behavior still requires acceptance on the confirmed iPadOS device.
