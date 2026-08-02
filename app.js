@@ -18,6 +18,11 @@
   const CANON_DATABASE = "dreamspeak-canon";
   const CANON_CHUNK_STORE = "chunks";
   const CANON_META_STORE = "meta";
+  const THEATER_DATABASE = "dreamspeak-theater";
+  const THEATER_VIDEO_STORE = "videos";
+  const THEATER_METADATA_STORE = "metadata";
+  const THEATER_POSTER_STORE = "posters";
+  const THEATER_STATE_KEY = "dreamspeak.music-theater.v1";
   const MAX_CANON_FILE_SIZE = 25 * 1024 * 1024;
   const AUTOSAVE_DELAY = 650;
   const DEFAULT_PREPARED_QUESTION = "Based only on the sources in this notebook, what canon details are most relevant to the scene I am drafting?";
@@ -28,6 +33,7 @@
     { id: "timeline", label: "Timeline", type: "external", title: "Timeline", kind: "Placeholder launcher", note: "reserve a safe path to a future timeline.", description: "Add a timeline address when one is available. Timeline exploration itself remains a future, separately scoped tool.", actionLabel: "Open Timeline" },
     { id: "images", label: "Images", type: "internal", target: "images", note: "move to the private image library already on this device." },
     { id: "music", label: "Music", type: "internal", target: "music", note: "move to the local Discography player." },
+    { id: "theater", label: "Theater", type: "theater", title: "Dreamspeak Music Theater", note: "watch an expandable private video library stored on this device." },
     { id: "notebook", label: "Notebook", type: "external", title: "NotebookLM / Gemini Notebook", kind: "External notebook launcher", note: "copy a prepared question or open your notebook safely.", description: "Paste the address of the notebook you want to use. Quiet Draft does not embed, automate, or sign in to Google services.", actionLabel: "Open Notebook", question: true }
   ];
   const DEFAULT_ATMOSPHERE = {
@@ -110,6 +116,24 @@
     canonResults: document.querySelector("#canon-results"),
     canonWikiUrl: document.querySelector("#canon-wiki-url"),
     canonOpenWiki: document.querySelector("#canon-open-wiki"),
+    theaterWorkspace: document.querySelector("#theater-workspace"),
+    theaterVideo: document.querySelector("#theater-video"),
+    theaterEmpty: document.querySelector("#theater-empty"),
+    theaterNowPlaying: document.querySelector("#theater-now-playing"),
+    theaterNowPlayingTitle: document.querySelector("#theater-now-playing-title"),
+    theaterTitleInput: document.querySelector("#theater-title-input"),
+    theaterYoutubeInput: document.querySelector("#theater-youtube-input"),
+    theaterSaveDetails: document.querySelector("#theater-save-details"),
+    theaterOpenYoutube: document.querySelector("#theater-open-youtube"),
+    theaterFullscreen: document.querySelector("#theater-fullscreen"),
+    theaterPosterUpload: document.querySelector("#theater-poster-upload"),
+    theaterRemovePoster: document.querySelector("#theater-remove-poster"),
+    theaterRemoveVideo: document.querySelector("#theater-remove-video"),
+    theaterSelectionMeta: document.querySelector("#theater-selection-meta"),
+    theaterLibraryStatus: document.querySelector("#theater-library-status"),
+    theaterLibraryList: document.querySelector("#theater-library-list"),
+    theaterVideoUpload: document.querySelector("#theater-video-upload"),
+    theaterVideoUploadEmpty: document.querySelector("#theater-video-upload-empty"),
     imageCard: document.querySelector(".image-card"),
     musicCard: document.querySelector(".music-card"),
     toast: document.querySelector("#toast"),
@@ -210,6 +234,16 @@
   let canonDatabasePromise = null;
   let canonChunks = [];
   let canonMetadata = null;
+  let theaterDatabasePromise = null;
+  let theaterVideos = [];
+  let theaterPosters = [];
+  let selectedTheaterVideoId = "";
+  let loadedTheaterVideoId = "";
+  let theaterVideoObjectUrl = null;
+  let theaterPosterObjectUrls = new Map();
+  let pendingTheaterPosition = 0;
+  let lastTheaterStateSecond = -1;
+  let theaterState = { selectedVideoId: "", positions: {} };
   let toolSettings = {
     urls: { wiki: "", motif: "", timeline: "", notebook: "" },
     preparedQuestion: DEFAULT_PREPARED_QUESTION
@@ -275,12 +309,18 @@
 
     const canon = tool.type === "canon";
     elements.canonWorkspace.hidden = !canon;
-    elements.editorModule.hidden = canon;
+    const theater = tool.type === "theater";
+    elements.theaterWorkspace.hidden = !theater;
+    elements.editorModule.hidden = canon || theater;
     const external = tool.type === "external";
     elements.toolDetail.hidden = !external;
     if (canon) {
       elements.canonWikiUrl.value = toolSettings.urls.wiki || "";
       renderCanonArchiveState();
+      return;
+    }
+    if (theater) {
+      renderTheater();
       return;
     }
     if (!external) return;
@@ -315,6 +355,10 @@
     const tool = TOOL_REGISTRY.find((item) => item.id === id);
     if (!tool) return;
     saveDraft();
+    if (activeToolId === "theater" && tool.id !== "theater") {
+      pauseTheater();
+      if (appIsForeground) restoreMusicForForeground();
+    }
     activeToolId = tool.id;
     renderToolCenter();
 
@@ -597,6 +641,549 @@
       elements.canonWikiUrl.focus();
       showToast("Enter a complete http or https address first");
     }
+  }
+
+  function openTheaterDatabase() {
+    if (theaterDatabasePromise) return theaterDatabasePromise;
+    theaterDatabasePromise = new Promise((resolve, reject) => {
+      const request = indexedDB.open(THEATER_DATABASE, 1);
+      request.onupgradeneeded = () => {
+        const database = request.result;
+        if (!database.objectStoreNames.contains(THEATER_VIDEO_STORE)) {
+          database.createObjectStore(THEATER_VIDEO_STORE, { keyPath: "id" });
+        }
+        if (!database.objectStoreNames.contains(THEATER_METADATA_STORE)) {
+          database.createObjectStore(THEATER_METADATA_STORE, { keyPath: "id" });
+        }
+        if (!database.objectStoreNames.contains(THEATER_POSTER_STORE)) {
+          database.createObjectStore(THEATER_POSTER_STORE, { keyPath: "id" });
+        }
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    return theaterDatabasePromise;
+  }
+
+  async function getAllTheaterRecords(storeName) {
+    const database = await openTheaterDatabase();
+    return new Promise((resolve, reject) => {
+      const request = database.transaction(storeName, "readonly").objectStore(storeName).getAll();
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async function storeTheaterRecord(storeName, record) {
+    const database = await openTheaterDatabase();
+    return new Promise((resolve, reject) => {
+      const request = database.transaction(storeName, "readwrite").objectStore(storeName).put(record);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async function deleteTheaterVideoRecords(id) {
+    const database = await openTheaterDatabase();
+    return new Promise((resolve, reject) => {
+      const transaction = database.transaction(
+        [THEATER_VIDEO_STORE, THEATER_METADATA_STORE, THEATER_POSTER_STORE],
+        "readwrite"
+      );
+      transaction.objectStore(THEATER_VIDEO_STORE).delete(id);
+      transaction.objectStore(THEATER_METADATA_STORE).delete(id);
+      transaction.objectStore(THEATER_POSTER_STORE).delete(id);
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+    });
+  }
+
+  async function deleteTheaterPosterRecord(id) {
+    const database = await openTheaterDatabase();
+    return new Promise((resolve, reject) => {
+      const request = database.transaction(THEATER_POSTER_STORE, "readwrite")
+        .objectStore(THEATER_POSTER_STORE)
+        .delete(id);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  function loadTheaterState() {
+    try {
+      theaterState = window.QuietDraftTheater.normalizeState(
+        JSON.parse(localStorage.getItem(THEATER_STATE_KEY))
+      );
+    } catch (error) {
+      theaterState = window.QuietDraftTheater.normalizeState(null);
+    }
+  }
+
+  function saveTheaterState() {
+    if (loadedTheaterVideoId && Number.isFinite(elements.theaterVideo.currentTime)) {
+      theaterState.positions[loadedTheaterVideoId] = elements.theaterVideo.currentTime;
+    }
+    theaterState.selectedVideoId = selectedTheaterVideoId;
+    try {
+      localStorage.setItem(THEATER_STATE_KEY, JSON.stringify(theaterState));
+    } catch (error) {
+      // Video playback still works when preference storage is unavailable.
+    }
+  }
+
+  function selectedTheaterVideo() {
+    return theaterVideos.find((video) => video.id === selectedTheaterVideoId) || null;
+  }
+
+  function selectedTheaterPoster() {
+    return theaterPosters.find((poster) => poster.id === selectedTheaterVideoId) || null;
+  }
+
+  function releaseTheaterVideoUrl() {
+    if (theaterVideoObjectUrl) URL.revokeObjectURL(theaterVideoObjectUrl);
+    theaterVideoObjectUrl = null;
+  }
+
+  function releaseTheaterPosterUrls() {
+    theaterPosterObjectUrls.forEach((url) => URL.revokeObjectURL(url));
+    theaterPosterObjectUrls.clear();
+  }
+
+  function theaterVideoMeta(video) {
+    const dimensions = video.width && video.height ? `${video.width}×${video.height}` : "MP4";
+    const duration = Number.isFinite(video.duration) && video.duration > 0 ? formatMusicTime(video.duration) : "Ready";
+    return `${duration} · ${dimensions} · ${window.QuietDraftTheater.formatBytes(video.size)}`;
+  }
+
+  function renderTheaterLibrary() {
+    releaseTheaterPosterUrls();
+    elements.theaterLibraryList.replaceChildren();
+    const totalSize = theaterVideos.reduce((total, video) => total + (Number(video.size) || 0), 0);
+    elements.theaterLibraryStatus.textContent = theaterVideos.length
+      ? `${theaterVideos.length} local video${theaterVideos.length === 1 ? "" : "s"} · ${window.QuietDraftTheater.formatBytes(totalSize)}`
+      : "No videos stored locally.";
+
+    for (const video of theaterVideos) {
+      const button = document.createElement("button");
+      button.className = "theater-library-item";
+      button.type = "button";
+      button.dataset.videoId = video.id;
+      const selected = video.id === selectedTheaterVideoId;
+      button.classList.toggle("active", selected);
+      button.setAttribute("aria-pressed", String(selected));
+
+      const visual = document.createElement("span");
+      visual.className = "theater-library-poster";
+      const poster = theaterPosters.find((item) => item.id === video.id);
+      if (poster && poster.blob) {
+        const image = document.createElement("img");
+        const url = URL.createObjectURL(poster.blob);
+        theaterPosterObjectUrls.set(video.id, url);
+        image.src = url;
+        image.alt = "";
+        visual.append(image);
+      } else {
+        visual.textContent = "▶";
+      }
+
+      const copy = document.createElement("span");
+      copy.className = "theater-library-copy";
+      const title = document.createElement("strong");
+      title.textContent = video.title;
+      const meta = document.createElement("span");
+      meta.textContent = theaterVideoMeta(video);
+      copy.append(title, meta);
+      button.append(visual, copy);
+      button.addEventListener("click", () => selectTheaterVideo(video.id));
+      elements.theaterLibraryList.append(button);
+    }
+  }
+
+  function renderTheaterDetails() {
+    const video = selectedTheaterVideo();
+    const hasVideo = Boolean(video);
+    elements.theaterEmpty.hidden = hasVideo;
+    elements.theaterVideo.hidden = !hasVideo;
+    elements.theaterNowPlaying.hidden = !hasVideo;
+    if (!hasVideo) return;
+    elements.theaterNowPlayingTitle.textContent = video.title;
+    elements.theaterTitleInput.value = video.title;
+    elements.theaterYoutubeInput.value = video.youtubeUrl || "";
+    elements.theaterVideo.removeAttribute("poster");
+    const posterUrl = theaterPosterObjectUrls.get(video.id);
+    if (posterUrl) elements.theaterVideo.poster = posterUrl;
+    elements.theaterOpenYoutube.disabled = !window.QuietDraftTheater.safeYoutubeUrl(video.youtubeUrl);
+    elements.theaterRemovePoster.disabled = !selectedTheaterPoster();
+    elements.theaterSelectionMeta.textContent = `${video.name} · ${theaterVideoMeta(video)}`;
+  }
+
+  function renderTheater() {
+    renderTheaterLibrary();
+    renderTheaterDetails();
+  }
+
+  function loadSelectedTheaterVideo({ restorePosition = true } = {}) {
+    const video = selectedTheaterVideo();
+    if (loadedTheaterVideoId) saveTheaterState();
+    loadedTheaterVideoId = "";
+    elements.theaterVideo.pause();
+    releaseTheaterVideoUrl();
+    elements.theaterVideo.removeAttribute("src");
+    elements.theaterVideo.removeAttribute("poster");
+    if (!video || !video.blob) {
+      elements.theaterVideo.load();
+      renderTheaterDetails();
+      return;
+    }
+
+    theaterVideoObjectUrl = URL.createObjectURL(video.blob);
+    loadedTheaterVideoId = video.id;
+    elements.theaterVideo.src = theaterVideoObjectUrl;
+    const posterUrl = theaterPosterObjectUrls.get(video.id);
+    if (posterUrl) elements.theaterVideo.poster = posterUrl;
+    pendingTheaterPosition = restorePosition ? Number(theaterState.positions[video.id]) || 0 : 0;
+    lastTheaterStateSecond = -1;
+    elements.theaterVideo.load();
+    saveTheaterState();
+    renderTheaterDetails();
+  }
+
+  function selectTheaterVideo(id) {
+    if (!theaterVideos.some((video) => video.id === id)) return;
+    saveTheaterState();
+    selectedTheaterVideoId = id;
+    theaterState.selectedVideoId = id;
+    renderTheaterLibrary();
+    loadSelectedTheaterVideo();
+  }
+
+  async function loadTheaterLibrary({ preferVideoId = "" } = {}) {
+    try {
+      const [files, metadata, posters] = await Promise.all([
+        getAllTheaterRecords(THEATER_VIDEO_STORE),
+        getAllTheaterRecords(THEATER_METADATA_STORE),
+        getAllTheaterRecords(THEATER_POSTER_STORE)
+      ]);
+      const metadataById = new Map(metadata.map((item) => [item.id, item]));
+      theaterVideos = files
+        .map((file) => {
+          const details = metadataById.get(file.id) || {};
+          return {
+            ...file,
+            ...details,
+            title: details.title || window.QuietDraftTheater.titleFromFilename(file.name),
+            youtubeUrl: details.youtubeUrl || ""
+          };
+        })
+        .sort((a, b) => (a.addedAt || 0) - (b.addedAt || 0));
+      theaterPosters = posters;
+    } catch (error) {
+      theaterVideos = [];
+      theaterPosters = [];
+      showToast("The local video library is unavailable in this browser");
+    }
+
+    const requested = preferVideoId || theaterState.selectedVideoId;
+    selectedTheaterVideoId = theaterVideos.some((video) => video.id === requested)
+      ? requested
+      : (theaterVideos[0] ? theaterVideos[0].id : "");
+    renderTheaterLibrary();
+    loadSelectedTheaterVideo();
+  }
+
+  function inspectTheaterFile(file) {
+    return new Promise((resolve, reject) => {
+      const probe = document.createElement("video");
+      const url = URL.createObjectURL(file);
+      let settled = false;
+      const timeout = window.setTimeout(() => finish(new Error("Video metadata timed out")), 20000);
+      function finish(error) {
+        if (settled) return;
+        settled = true;
+        const metadata = {
+          duration: Number.isFinite(probe.duration) ? probe.duration : 0,
+          width: probe.videoWidth || 0,
+          height: probe.videoHeight || 0
+        };
+        window.clearTimeout(timeout);
+        probe.onloadedmetadata = null;
+        probe.onerror = null;
+        probe.removeAttribute("src");
+        probe.load();
+        URL.revokeObjectURL(url);
+        if (error) reject(error);
+        else resolve(metadata);
+      }
+      probe.preload = "metadata";
+      probe.onloadedmetadata = () => finish();
+      probe.onerror = () => finish(new Error("Unsupported video"));
+      probe.src = url;
+      probe.load();
+    });
+  }
+
+  function isStorageQuotaError(error) {
+    return Boolean(error && (error.name === "QuotaExceededError" || error.name === "NS_ERROR_DOM_QUOTA_REACHED"));
+  }
+
+  async function requestPersistentTheaterStorage() {
+    if (!navigator.storage || typeof navigator.storage.persist !== "function") return;
+    try {
+      await navigator.storage.persist();
+    } catch (error) {
+      // The theater remains usable when the browser declines persistence.
+    }
+  }
+
+  async function importTheaterVideos(event) {
+    const files = Array.from(event.target.files || []).slice(0, 50);
+    event.target.value = "";
+    if (!files.length) return;
+    const existing = new Set(theaterVideos.map((video) => video.identity));
+    let added = 0;
+    let skipped = 0;
+    let lastVideoId = "";
+
+    for (let index = 0; index < files.length; index += 1) {
+      const file = files[index];
+      elements.theaterLibraryStatus.textContent = `Importing ${index + 1} of ${files.length}…`;
+      if (!window.QuietDraftTheater.isCompatibleVideoFile(file)) {
+        skipped += 1;
+        continue;
+      }
+      const identity = window.QuietDraftTheater.videoIdentity(file);
+      if (existing.has(identity)) {
+        skipped += 1;
+        continue;
+      }
+      let id = "";
+      try {
+        const inspected = await inspectTheaterFile(file);
+        id = newSoundId();
+        const now = Date.now() + added;
+        await storeTheaterRecord(THEATER_VIDEO_STORE, {
+          id,
+          identity,
+          name: file.name,
+          type: file.type || "video/mp4",
+          size: file.size,
+          lastModified: file.lastModified || 0,
+          blob: file,
+          addedAt: now
+        });
+        await storeTheaterRecord(THEATER_METADATA_STORE, {
+          id,
+          title: window.QuietDraftTheater.titleFromFilename(file.name),
+          youtubeUrl: "",
+          duration: inspected.duration,
+          width: inspected.width,
+          height: inspected.height,
+          updatedAt: now
+        });
+        existing.add(identity);
+        lastVideoId = id;
+        added += 1;
+      } catch (error) {
+        if (id) {
+          try {
+            await deleteTheaterVideoRecords(id);
+          } catch (cleanupError) {
+            // A future load ignores incomplete records without matching video data.
+          }
+        }
+        skipped += 1;
+        if (isStorageQuotaError(error)) {
+          showToast("Browser storage filled before every video could be added. Keep the originals in Files.");
+          break;
+        }
+      }
+    }
+
+    if (added) await requestPersistentTheaterStorage();
+    await loadTheaterLibrary({ preferVideoId: lastVideoId });
+    const skippedNote = skipped ? ` · ${skipped} skipped` : "";
+    showToast(added ? `${added} video${added === 1 ? "" : "s"} added locally${skippedNote}` : "No new compatible MP4 videos were added");
+  }
+
+  async function saveTheaterDetails() {
+    const video = selectedTheaterVideo();
+    if (!video) return;
+    const title = elements.theaterTitleInput.value.trim().slice(0, 160);
+    if (!title) {
+      elements.theaterTitleInput.focus();
+      showToast("Add a title before saving");
+      return;
+    }
+    const youtubeValue = elements.theaterYoutubeInput.value.trim();
+    const youtubeUrl = youtubeValue ? window.QuietDraftTheater.safeYoutubeUrl(youtubeValue) : "";
+    if (youtubeValue && !youtubeUrl) {
+      elements.theaterYoutubeInput.focus();
+      showToast("Use a complete HTTPS YouTube or youtu.be address");
+      return;
+    }
+    const metadata = {
+      id: video.id,
+      title,
+      youtubeUrl,
+      duration: video.duration || 0,
+      width: video.width || 0,
+      height: video.height || 0,
+      updatedAt: Date.now()
+    };
+    try {
+      await storeTheaterRecord(THEATER_METADATA_STORE, metadata);
+      Object.assign(video, metadata);
+      renderTheater();
+      showToast("Video details saved locally");
+    } catch (error) {
+      showToast("Video details could not be saved");
+    }
+  }
+
+  function openTheaterYoutube() {
+    const video = selectedTheaterVideo();
+    const url = video && window.QuietDraftTheater.safeYoutubeUrl(video.youtubeUrl);
+    if (!url) {
+      elements.theaterYoutubeInput.focus();
+      showToast("Save a valid YouTube fallback first");
+      return;
+    }
+    openProtectedUrl(url, `${video.title} on YouTube`);
+  }
+
+  async function importTheaterPoster(event) {
+    const file = event.target.files && event.target.files[0];
+    event.target.value = "";
+    const video = selectedTheaterVideo();
+    if (!file || !video) return;
+    if (file.size > 15 * 1024 * 1024) {
+      showToast("Poster images must be smaller than 15 MB");
+      return;
+    }
+    try {
+      await validateImage(file);
+      await storeTheaterRecord(THEATER_POSTER_STORE, {
+        id: video.id,
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        blob: file,
+        updatedAt: Date.now()
+      });
+      theaterPosters = await getAllTheaterRecords(THEATER_POSTER_STORE);
+      renderTheaterLibrary();
+      loadSelectedTheaterVideo();
+      showToast("Poster saved locally");
+    } catch (error) {
+      showToast("That poster image could not be added");
+    }
+  }
+
+  async function removeTheaterPoster() {
+    const video = selectedTheaterVideo();
+    if (!video || !selectedTheaterPoster()) return;
+    if (!window.confirm(`Remove the local poster for “${video.title}”?`)) return;
+    try {
+      await deleteTheaterPosterRecord(video.id);
+      theaterPosters = theaterPosters.filter((poster) => poster.id !== video.id);
+      renderTheaterLibrary();
+      loadSelectedTheaterVideo();
+      showToast("Local poster removed");
+    } catch (error) {
+      showToast("The local poster could not be removed");
+    }
+  }
+
+  async function removeTheaterVideo() {
+    const video = selectedTheaterVideo();
+    if (!video) return;
+    if (!window.confirm(`Remove the browser copy of “${video.title}”? Keep the original file as your backup.`)) return;
+    try {
+      pauseTheater();
+      await deleteTheaterVideoRecords(video.id);
+      theaterVideos = theaterVideos.filter((item) => item.id !== video.id);
+      theaterPosters = theaterPosters.filter((poster) => poster.id !== video.id);
+      loadedTheaterVideoId = "";
+      selectedTheaterVideoId = "";
+      delete theaterState.positions[video.id];
+      theaterState.selectedVideoId = "";
+      saveTheaterState();
+      await loadTheaterLibrary();
+      showToast("Local video removed");
+    } catch (error) {
+      showToast("The local video could not be removed");
+    }
+  }
+
+  async function enterTheaterFullscreen() {
+    if (!selectedTheaterVideo()) return;
+    try {
+      if (typeof elements.theaterVideo.requestFullscreen === "function") {
+        await elements.theaterVideo.requestFullscreen();
+      } else if (typeof elements.theaterVideo.webkitEnterFullscreen === "function") {
+        elements.theaterVideo.webkitEnterFullscreen();
+      } else {
+        showToast("Use the full-screen control in the video player");
+      }
+    } catch (error) {
+      showToast("Use the full-screen control in the video player");
+    }
+  }
+
+  function handleTheaterMetadata() {
+    const video = selectedTheaterVideo();
+    if (!video) return;
+    if (pendingTheaterPosition > 0 && Number.isFinite(elements.theaterVideo.duration)) {
+      elements.theaterVideo.currentTime = Math.min(
+        pendingTheaterPosition,
+        Math.max(0, elements.theaterVideo.duration - 0.25)
+      );
+    }
+    pendingTheaterPosition = 0;
+    const changed = video.duration !== elements.theaterVideo.duration
+      || video.width !== elements.theaterVideo.videoWidth
+      || video.height !== elements.theaterVideo.videoHeight;
+    video.duration = Number.isFinite(elements.theaterVideo.duration) ? elements.theaterVideo.duration : 0;
+    video.width = elements.theaterVideo.videoWidth || 0;
+    video.height = elements.theaterVideo.videoHeight || 0;
+    renderTheaterLibrary();
+    renderTheaterDetails();
+    if (changed) {
+      storeTheaterRecord(THEATER_METADATA_STORE, {
+        id: video.id,
+        title: video.title,
+        youtubeUrl: video.youtubeUrl || "",
+        duration: video.duration,
+        width: video.width,
+        height: video.height,
+        updatedAt: Date.now()
+      }).catch(() => {});
+    }
+  }
+
+  function handleTheaterTimeUpdate() {
+    if (!appIsForeground || document.visibilityState === "hidden" || activeToolId !== "theater") {
+      pauseTheater();
+      return;
+    }
+    const second = Math.floor(elements.theaterVideo.currentTime / 5);
+    if (second !== lastTheaterStateSecond) {
+      lastTheaterStateSecond = second;
+      saveTheaterState();
+    }
+  }
+
+  function handleTheaterPlay() {
+    if (!appIsForeground || document.visibilityState === "hidden" || activeToolId !== "theater") {
+      pauseTheater();
+      return;
+    }
+    pauseMusicForBackground();
+  }
+
+  function pauseTheater() {
+    if (elements.theaterVideo && !elements.theaterVideo.paused) elements.theaterVideo.pause();
+    if (elements.theaterVideo) saveTheaterState();
   }
 
   function loadAtmosphere() {
@@ -1520,12 +2107,14 @@
 
   function handleAppBackground() {
     appIsForeground = false;
+    pauseTheater();
     pauseMusicForBackground();
     saveDraft();
   }
 
   function handleAppForeground() {
-    restoreMusicForForeground();
+    appIsForeground = true;
+    if (activeToolId !== "theater") restoreMusicForForeground();
     renderWritingMetrics();
   }
 
@@ -2286,6 +2875,23 @@
     saveToolSettings();
   });
   elements.canonOpenWiki.addEventListener("click", openMacWiki);
+  elements.theaterVideoUpload.addEventListener("change", importTheaterVideos);
+  elements.theaterVideoUploadEmpty.addEventListener("change", importTheaterVideos);
+  elements.theaterSaveDetails.addEventListener("click", saveTheaterDetails);
+  elements.theaterOpenYoutube.addEventListener("click", openTheaterYoutube);
+  elements.theaterFullscreen.addEventListener("click", enterTheaterFullscreen);
+  elements.theaterPosterUpload.addEventListener("change", importTheaterPoster);
+  elements.theaterRemovePoster.addEventListener("click", removeTheaterPoster);
+  elements.theaterRemoveVideo.addEventListener("click", removeTheaterVideo);
+  elements.theaterVideo.addEventListener("loadedmetadata", handleTheaterMetadata);
+  elements.theaterVideo.addEventListener("timeupdate", handleTheaterTimeUpdate);
+  elements.theaterVideo.addEventListener("seeked", saveTheaterState);
+  elements.theaterVideo.addEventListener("play", handleTheaterPlay);
+  elements.theaterVideo.addEventListener("pause", saveTheaterState);
+  elements.theaterVideo.addEventListener("ended", saveTheaterState);
+  elements.theaterVideo.addEventListener("error", () => {
+    if (activeToolId === "theater") showToast("This local video could not be played");
+  });
   elements.newDraft.addEventListener("click", newDraft);
   elements.saveDraft.addEventListener("click", () => saveDraft({ announce: true }));
   elements.exportDraft.addEventListener("click", exportDraft);
@@ -2413,6 +3019,7 @@
 
   loadAtmosphere();
   loadMusicState();
+  loadTheaterState();
   initializeMusicMediaSession();
   loadWritingMetrics();
   applyTheme(preferredTheme());
@@ -2423,6 +3030,7 @@
   loadCharacterModules();
   loadGallery();
   loadMusicLibrary({ restorePosition: true });
+  loadTheaterLibrary();
   loadDraft();
   initializeToolCenter();
   loadCanonArchive();
@@ -2432,7 +3040,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260802-2")
+      navigator.serviceWorker.register("./service-worker.js?v=20260802-3")
         .then((registration) => registration.update())
         .catch((error) => {
           if (!navigator.serviceWorker.controller) {

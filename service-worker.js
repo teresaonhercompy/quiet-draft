@@ -1,4 +1,4 @@
-const VERSION = "20260802-2";
+const VERSION = "20260802-3";
 const CACHE_NAME = `quiet-draft-${VERSION}`;
 const APP_SHELL = [
   "./",
@@ -6,6 +6,7 @@ const APP_SHELL = [
   `./styles.css?v=${VERSION}`,
   `./music-metadata.js?v=${VERSION}`,
   `./media-session.js?v=${VERSION}`,
+  `./theater-core.js?v=${VERSION}`,
   `./canon-core.js?v=${VERSION}`,
   `./app.js?v=${VERSION}`,
   `./manifest.webmanifest?v=${VERSION}`,
@@ -43,6 +44,7 @@ self.addEventListener("fetch", (event) => {
   const requestUrl = new URL(event.request.url);
   if (requestUrl.origin !== self.location.origin) return;
   if (requestUrl.pathname.toLowerCase().endsWith(".dreamspeak-canon.json")) return;
+  if (requestUrl.pathname.toLowerCase().endsWith(".mp4")) return;
 
   event.respondWith(
     fetch(event.request)

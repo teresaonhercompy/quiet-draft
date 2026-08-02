@@ -2,13 +2,15 @@
 
 **Updated:** 2026-08-02
 
-**Current phase:** Phase 7C — Music Theater Ready for Approval
+**Current phase:** Phase 7C — Music Theater Implementation and Test
 
-**Phase state:** Phase 7A accepted on the physical iPad; Phase 7B held; Phase 7C scoped but not approved
+**Phase state:** Phase 7A accepted; Phase 7B held; Phase 7C approved and implemented as an iPad test candidate
 
 **Current production version:** Dreamspeak Command Center Phase 7A / service-worker cache `20260802-2`
 
 **Current production commit:** `cdf8f3c`
+
+**Phase 7C test candidate:** service-worker cache `20260802-3`
 
 **Production:** <https://teresaonhercompy.github.io/quiet-draft/>
 
@@ -107,9 +109,10 @@
 ## In-progress work
 
 - Phase 7B is explicitly held by user request and must not be implemented unless reopened.
-- Phase 7C is fully scoped but not approved. The two initial H.264/AAC `.mp4` files have been optimized to approximately 100 MB each, and the iPad has approximately 93 GB available.
+- Phase 7C is approved. The two initial H.264/AAC `.mp4` files have been optimized to approximately 100 MB each, and the iPad has approximately 93 GB available.
 - **Music Theater**, local-first playback, manually selected per-video posters, and an expandable additive library for future videos are confirmed.
-- Future videos must be importable through a persistent **Add Videos** action without replacing existing entries or requiring code changes.
+- The candidate provides a persistent **Add Videos** action, separate local video/metadata/poster stores, filename-derived editable titles, optional YouTube fallbacks, per-video removal, native playback/full screen, saved position without autoplay, and foreground-only playback.
+- No Phase 7B code was added.
 - Phase 8 remains optional and unapproved; none of the current media enhancements requires it.
 
 ## Known observations
@@ -123,7 +126,7 @@
 
 ## Next approved task
 
-No further Phase 7 implementation is approved. Phase 7B remains held. Phase 7C has cleared its storage and format questions and is ready for explicit implementation approval.
+Deploy cache `20260802-3` and run the physical iPad Music Theater acceptance sequence with the two optimized private videos. Phase 7B remains held.
 
 ## Last tested production baseline
 
@@ -169,6 +172,21 @@ No further Phase 7 implementation is approved. Phase 7B remains held. Phase 7C h
 - **Foreground-only playback:** audio stopped on return to the Home Screen and after app-switcher dismissal.
 - **Return behavior:** relaunch restored the selected track near its saved position but remained paused.
 - **Acceptance recorded:** 2026-08-02 for service-worker cache `20260802-2`, production commit `cdf8f3c`.
+
+## Phase 7C candidate validation
+
+- **Theater core tests:** filename titles, MP4 recognition, duplicate identity, safe YouTube links, storage formatting, and playback-state normalization passed.
+- **Syntax/data validation:** JavaScript and manifest validation passed; existing Media Session and canon tests passed unchanged.
+- **Empty state:** Theater opens as a center workspace with an available Add Videos action and no bundled private media.
+- **Expandable library:** two non-private test videos imported independently; the second appended without replacing the first or its edited metadata.
+- **Details and posters:** edited title and YouTube fallback persisted; a local poster attached, appeared in the library/player, and removed cleanly.
+- **Removal:** one browser-managed video copy was removed without affecting the other entry.
+- **Playback state:** local video played, paused on tool exit, and restored near its saved position without autoplay.
+- **Layouts:** 1180×820 and 820×1180 had no horizontal overflow; the theater stage and library remained reachable.
+- **Offline relaunch:** the app shell and remaining local video reopened with the preview server stopped.
+- **Privacy/cache:** no video or poster is tracked by Git or listed in the service-worker app shell; same-origin `.mp4` requests are excluded from runtime caching.
+- **Console:** no app-specific warnings or errors.
+- **Remaining physical acceptance:** import the two optimized private MP4s on the iPad and verify native playback, full screen, poster selection, persistence, foreground pausing, removal safety, and Airplane Mode.
 - **Internal tools:** Images remained aligned at the top of the landscape media rail; Music scrolled that rail to its complete card while preserving the active state
 - **Phase 5 landscape:** 1180×820, no horizontal/page overflow; all seven tabs fit; expanded Notebook panel leaves a 316px editor and Focus Mode restores 820px
 - **Phase 5 portrait:** 820×1180, no horizontal overflow; editor remains ahead of supporting modules and normal page scrolling reaches them

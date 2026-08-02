@@ -8,9 +8,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Dreamspeak">
-    <link rel="manifest" href="manifest.webmanifest?v=20260802-2">
-    <link rel="icon" href="icon.svg?v=20260802-2" type="image/svg+xml">
-    <link rel="stylesheet" href="styles.css?v=20260802-2">
+    <link rel="manifest" href="manifest.webmanifest?v=20260802-3">
+    <link rel="icon" href="icon.svg?v=20260802-3" type="image/svg+xml">
+    <link rel="stylesheet" href="styles.css?v=20260802-3">
     <title>Dreamspeak Command Center</title>
   </head>
   <body>
@@ -215,6 +215,76 @@
                   <button class="module-button secondary" id="canon-open-wiki" type="button">Open Mac Wiki</button>
                 </div>
               </details>
+            </div>
+          </section>
+
+          <section class="theater-workspace" id="theater-workspace" aria-labelledby="theater-workspace-title" hidden>
+            <header class="theater-header">
+              <div>
+                <span class="eyebrow">Private screening room</span>
+                <h2 id="theater-workspace-title">Dreamspeak Music Theater</h2>
+              </div>
+              <span class="private-badge"><span aria-hidden="true">◆</span> Local · Offline</span>
+            </header>
+
+            <div class="theater-body">
+              <section class="theater-player-panel" aria-labelledby="theater-now-playing-title">
+                <div class="theater-stage">
+                  <video id="theater-video" controls playsinline preload="metadata" hidden></video>
+                  <div class="theater-empty" id="theater-empty">
+                    <span aria-hidden="true">▶</span>
+                    <strong>Your private theater is ready.</strong>
+                    <p>Add an H.264/AAC MP4 from Files to begin.</p>
+                    <label class="module-button" for="theater-video-upload-empty">Add Videos</label>
+                    <input id="theater-video-upload-empty" class="visually-hidden" type="file" accept="video/mp4,.mp4" multiple>
+                  </div>
+                </div>
+
+                <div class="theater-now-playing" id="theater-now-playing" hidden>
+                  <div class="theater-title-row">
+                    <div>
+                      <span class="eyebrow">Now selected</span>
+                      <h3 id="theater-now-playing-title">Local video</h3>
+                    </div>
+                    <span class="placeholder-badge" id="theater-source-badge">Local · Offline</span>
+                  </div>
+
+                  <div class="theater-detail-grid">
+                    <label for="theater-title-input">Title</label>
+                    <input id="theater-title-input" type="text" maxlength="160" autocomplete="off">
+                    <label for="theater-youtube-input">YouTube fallback</label>
+                    <input id="theater-youtube-input" type="url" inputmode="url" maxlength="2000" autocomplete="off" spellcheck="false" placeholder="Optional private or unlisted https://…">
+                  </div>
+
+                  <div class="theater-detail-actions">
+                    <button class="module-button" id="theater-save-details" type="button">Save Details</button>
+                    <button class="module-button secondary" id="theater-open-youtube" type="button" disabled>Open YouTube</button>
+                    <button class="module-button secondary" id="theater-fullscreen" type="button">Full Screen</button>
+                  </div>
+
+                  <div class="theater-poster-actions">
+                    <label class="text-button" for="theater-poster-upload">Add or Change Poster</label>
+                    <input id="theater-poster-upload" class="visually-hidden" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.avif">
+                    <button class="text-button" id="theater-remove-poster" type="button" disabled>Remove Poster</button>
+                    <button class="text-button danger" id="theater-remove-video" type="button">Remove Local Video</button>
+                  </div>
+                  <p class="theater-selection-meta" id="theater-selection-meta"></p>
+                </div>
+              </section>
+
+              <aside class="theater-library" aria-labelledby="theater-library-title">
+                <div class="theater-library-heading">
+                  <div>
+                    <span class="eyebrow">This device</span>
+                    <h3 id="theater-library-title">Video Library</h3>
+                  </div>
+                  <label class="module-button" for="theater-video-upload">Add Videos</label>
+                  <input id="theater-video-upload" class="visually-hidden" type="file" accept="video/mp4,.mp4" multiple>
+                </div>
+                <p id="theater-library-status">No videos stored locally.</p>
+                <div class="theater-library-list" id="theater-library-list" aria-label="Local videos"></div>
+                <p class="theater-privacy-note">Videos and posters stay in this browser. They are never uploaded or added to the app cache. Keep the originals in Files or on your Mac.</p>
+              </aside>
             </div>
           </section>
 
@@ -476,9 +546,10 @@
       <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
     </div>
 
-    <script src="music-metadata.js?v=20260802-2" defer></script>
-    <script src="media-session.js?v=20260802-2" defer></script>
-    <script src="canon-core.js?v=20260802-2" defer></script>
-    <script src="app.js?v=20260802-2" defer></script>
+    <script src="music-metadata.js?v=20260802-3" defer></script>
+    <script src="media-session.js?v=20260802-3" defer></script>
+    <script src="theater-core.js?v=20260802-3" defer></script>
+    <script src="canon-core.js?v=20260802-3" defer></script>
+    <script src="app.js?v=20260802-3" defer></script>
   </body>
 </html>

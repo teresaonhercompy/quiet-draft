@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-02
 
-**Status:** Phase 7A accepted on the physical iPad; Phase 7B held by user request; Phase 7C scoped only
+**Status:** Phase 7A accepted; Phase 7B held by user request; Phase 7C approved and implemented as a test candidate
 
 ## Accepted baseline
 
@@ -160,6 +160,12 @@ Local MP4 playback best matches the existing architecture and works offline. Unl
 
 Video should use a separate `dreamspeak-theater` IndexedDB database with additive `videos` and `posters` records, not the service-worker cache. This makes future imports, individual deletion, and quota troubleshooting clearer and avoids changing accepted music/image record shapes. New imports append records; they do not require a schema or application-code change merely because another video was created.
 
+### Implementation state
+
+The approved Phase 7C candidate uses separate `videos`, `metadata`, and `posters` object stores so editing a title or fallback link does not rewrite a large video blob. A persistent **Add Videos** action accepts future MP4s and appends records without a hard-coded library limit. Local playback uses the native video element with inline controls and a full-screen action. Selected video and approximate position persist in the additive `dreamspeak.music-theater.v1` preference record without autoplay.
+
+Local browser validation covered an empty library, two independent video imports, future-video append behavior, editable title and YouTube fallback, per-video poster import/removal, individual video removal, playback, tool-exit pausing, position restoration, iPad landscape and portrait layouts, and offline relaunch. Private video and poster blobs remain outside Git and the service-worker cache.
+
 ### Deferred unless explicitly requested
 
 - Downloading videos from YouTube
@@ -185,7 +191,7 @@ Held by explicit user request. Do not begin implementation or seek further image
 
 ### Phase 7C
 
-The files, codecs, optimized sizes, playback priority, label, poster policy, expandable-library requirement, and approximately 93 GB of available iPad storage are confirmed. Phase 7C is ready for explicit implementation approval.
+Approved and implemented as cache `20260802-3`. Physical iPad acceptance with the user's private optimized videos remains required.
 
 ## Current official references
 
