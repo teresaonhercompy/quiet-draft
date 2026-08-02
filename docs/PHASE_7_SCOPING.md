@@ -18,8 +18,10 @@ The three requested enhancements are technically feasible and belong in Phase 7.
 - **Visual library:** approximately 900 Dreamspeak images in Apple Photos on both the Mac and iPad
 - **Visual V1 metadata:** no captions or collections required
 - **Visual V1 management:** no removal controls required
-- **Music video one:** `.mp4`, H.264 video, AAC audio, 514 MB, 5:40, 1280×720
-- **Music video two:** `.mp4`, H.264 video, AAC audio, 601 MB, 6:38, 1280×720
+- **Available iPad storage:** approximately 93 GB
+- **Music video one:** optimized `.mp4`, H.264 video, AAC audio, approximately 100 MB, 5:40, 1280×720
+- **Music video two:** optimized `.mp4`, H.264 video, AAC audio, approximately 100 MB, 6:38, 1280×720
+- **Future library:** additional locally imported videos must be easy to add without replacing existing entries
 - **Theater label:** **Music Theater**
 - **Playback priority:** local MP4/MPEG-4 first; YouTube only as an optional fallback
 - **Poster policy:** a manually selected poster image is sufficient
@@ -30,7 +32,7 @@ The three requested enhancements are technically feasible and belong in Phase 7.
 2. **Phase 7C — Dreamspeak Music Theater:** scoped for a later explicit approval
 3. **Phase 7B — Center-panel Visual Archive:** held; do not implement unless the user reopens it
 
-Phase 7A is the smallest, highest-value writing enhancement. Phase 7B is intentionally deferred because the Photos app already provides a capable image browser. The confirmed Phase 7C files need no codec conversion, but their approximately 1.1 GB local-storage commitment still warrants a separate approval and device-capacity check before implementation.
+Phase 7A is the smallest, highest-value writing enhancement. Phase 7B is intentionally deferred because the Photos app already provides a capable image browser. Phase 7C now has ample confirmed device capacity: its initial optimized library is approximately 200 MB against roughly 93 GB of available iPad storage. It is ready for explicit implementation approval.
 
 ## Phase 7A — Hardware Media Controls
 
@@ -120,7 +122,7 @@ Use the standard Fullscreen API when available on iPadOS, with an in-app edge-to
 
 ### Goal
 
-Add a new center-panel tool named **Music Theater** for two music videos, with local private playback as the primary path and optional YouTube links as an online fallback.
+Add a new center-panel tool named **Music Theater** for an expandable private video library, beginning with two music videos. Local playback is the primary path and optional YouTube links remain an online fallback.
 
 ### Recommended source policy
 
@@ -130,14 +132,18 @@ Add a new center-panel tool named **Music Theater** for two music videos, with l
 
 YouTube allows creators to download their own uploaded videos through YouTube Studio, but that should remain a manual user action. The app should consume the resulting MP4 or the user's original file.
 
-The current files total approximately 1.1 GB. Modern Home Screen web apps can often store that amount when the iPad has adequate free space, but the import would create another device-local copy and browser data remains subject to quota and storage-pressure behavior. Both files are confirmed H.264/AAC MP4s, so conversion is unnecessary.
+The optimized initial files total approximately 200 MB, and the iPad currently has approximately 93 GB available. The import still creates a browser-managed device-local copy, and browser data remains subject to quota and storage-pressure behavior. Both files are confirmed H.264/AAC MP4s, so conversion is unnecessary.
 
 ### Proposed V1 scope
 
 - Add one data-driven Tool Center tab for **Theater**.
-- Import local MP4 files explicitly from Files.
+- Import one or multiple local MP4 files explicitly from Files.
 - Store private local video records separately from the app shell and service-worker cache.
-- Show a two-item library with title and a manually selected optional poster image.
+- Use an additive, data-driven library with no hard-coded two-video limit.
+- Keep a clear **Add Videos** action available after the initial setup so future films append without replacing existing entries.
+- Derive a title from each filename and allow the title to be edited locally.
+- Allow a manually selected optional poster image to be added, changed, or removed for each video.
+- Allow an individual browser-managed video copy to be removed without affecting any other entry or the original file.
 - Play through a standard HTML video element with native controls.
 - Support inline playback, full-screen playback, scrub, volume, and play/pause.
 - Remember the selected video and approximate position, but never autoplay.
@@ -152,7 +158,7 @@ Local MP4 playback best matches the existing architecture and works offline. Unl
 
 ### Storage approach
 
-Video should use a separate `dreamspeak-theater` IndexedDB database or an isolated video store, not the service-worker cache. This makes deletion and quota troubleshooting clearer and avoids changing accepted music/image record shapes. Because video files can be large, the two MP4 file sizes must be confirmed before implementation.
+Video should use a separate `dreamspeak-theater` IndexedDB database with additive `videos` and `posters` records, not the service-worker cache. This makes future imports, individual deletion, and quota troubleshooting clearer and avoids changing accepted music/image record shapes. New imports append records; they do not require a schema or application-code change merely because another video was created.
 
 ### Deferred unless explicitly requested
 
@@ -179,7 +185,7 @@ Held by explicit user request. Do not begin implementation or seek further image
 
 ### Phase 7C
 
-The files, codecs, playback priority, label, and poster policy are confirmed. Before implementation, obtain explicit approval for Phase 7C and verify that the iPad has enough free space for approximately 1.1 GB of browser-managed copies plus working headroom.
+The files, codecs, optimized sizes, playback priority, label, poster policy, expandable-library requirement, and approximately 93 GB of available iPad storage are confirmed. Phase 7C is ready for explicit implementation approval.
 
 ## Current official references
 
